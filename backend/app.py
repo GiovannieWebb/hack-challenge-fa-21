@@ -73,5 +73,24 @@ def get_comments():
     )
 
 
+@app.route("/api/ingredients/", methods=["POST"])
+def add_ingredient():
+    """
+    Adds an ingredient.\n
+    {
+        "name": <string>
+    }\n
+    Error 400 if name is not specified
+    """
+    body = json.loads(request.data)
+    name = body.get("name")
+    if name is None:
+        return failure_response("Ingredient name not found!", 400)
+    new_ingredient = Ingredient(name=name)
+    db.session.add(new_ingredient)
+    db.session.commit()
+    return success_response(new_ingredient.serialize(), 201)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
