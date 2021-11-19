@@ -54,7 +54,11 @@ class Recipe(db.Model):
         self.likes = 0
 
     def serialize(self):
-        return {}
+        return {
+            "id": self.id,
+            "likes": self.likes,
+            "comments": [c.serialize for c in self.comments]
+        }
 
 
 class Comment(db.Model):
@@ -70,7 +74,11 @@ class Comment(db.Model):
         self.recipe_id = kwargs.get("recipe_id")
 
     def serialize(self):
-        return {}
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "recipe_id": self.recipe_id
+        }
 
 
 class Ingredient(db.Model):
@@ -82,7 +90,10 @@ class Ingredient(db.Model):
         self.name = kwargs.get("name")
 
     def serialize(self):
-        return {}
+        return {
+            "id": self.id,
+            "name": self.name
+        }
 
 
 """

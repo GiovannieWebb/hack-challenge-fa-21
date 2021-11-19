@@ -34,9 +34,42 @@ def failure_response(message, code=404):
 
 @app.route("/")
 @app.route("/api/users/")
-def get_courses():
+def get_users():
+    """
+    Returns all users.
+    """
     return success_response(
         {"users": [u.serialize() for u in User.query.all()]}
+    )
+
+
+@app.route("/api/recipes/")
+def get_recipies():
+    """
+    Returns all recipies.
+    """
+    return success_response(
+        {"recipes": [r.serialize() for r in Recipe.query.all()]}
+    )
+
+
+@app.route("/api/ingredients/")
+def get_ingredients():
+    """
+    Returns all ingredients.
+    """
+    return success_response(
+        {"ingredients": [i.serialize() for i in Ingredient.query.all()]}
+    )
+
+
+@app.route("/api/comments/")
+def get_comments():
+    """
+    Returns all comments.
+    """
+    return success_response(
+        {"comments": [c.serialize() for c in Comment.query.all()]}
     )
 
 
