@@ -189,6 +189,11 @@ def get_comments():
     )
 
 
+@app.route("/api/comments/<int:user_id>/<int:recipe_id>/", methods=["POST"])
+def add_comment_from_user_to_recipe(user_id, recipe_id):
+    pass
+
+
 @app.route("/api/ingredients/", methods=["POST"])
 def add_ingredient():
     """
