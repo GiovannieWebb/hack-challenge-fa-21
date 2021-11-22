@@ -44,9 +44,9 @@ def get_users():
 
 
 @app.route("/api/recipes/")
-def get_recipies():
+def get_recipes():
     """
-    Returns all recipies.
+    Returns all recipes.
     """
     return success_response(
         {"recipes": [r.serialize() for r in Recipe.query.all()]}

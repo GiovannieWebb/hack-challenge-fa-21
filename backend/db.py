@@ -24,8 +24,8 @@ class User(db.Model):
     username = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False)
     password = db.Column(db.String, nullable=True)
-    liked_recipies = db.relationship("Recipe")
-    posted_recipies = db.relationship("Recipe", cascade="delete")
+    liked_recipes = db.relationship("Recipe")
+    posted_recipes = db.relationship("Recipe", cascade="delete")
     comments = db.relationship("Comment", cascade="delete")
 
     def __init__(self, **kwargs):
@@ -38,8 +38,8 @@ class User(db.Model):
             "id": self.id,
             "username": self.username,
             "email": self.email,
-            "liked_recipies": [r.serialize() for r in self.liked_recipies],
-            "posted_recipies": [pr.serialize() for pr in self.posted_recipies],
+            "liked_recipes": [r.serialize() for r in self.liked_recipes],
+            "posted_recipes": [pr.serialize() for pr in self.posted_recipes],
             "comments": [c.serialize() for c in self.comments]
         }
 
