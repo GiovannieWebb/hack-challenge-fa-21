@@ -179,6 +179,20 @@ def get_ingredients():
     )
 
 
+@app.route("/api/ingredients/<int:recipe_id>/")
+def get_ingredients_for_specific_recipe(recipe_id):
+    """
+    Gets all ingredients for a specific recipe.
+    Error 404 if recipe with recipe_id does not exist
+    """
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
+    if recipe is None:
+        return failure_response("Recipe not found!", 404)
+    return success_response(
+        {"ingredients": [m.serialize() for m in recipe.contents]}
+    )
+
+
 @app.route("/api/comments/")
 def get_comments():
     """

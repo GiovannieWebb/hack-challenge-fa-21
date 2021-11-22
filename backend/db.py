@@ -48,7 +48,7 @@ class Metric(db.Model):
     amount = db.Column(db.Integer, nullable=False)
     is_metric = db.Column(db.Boolean, nullable=False)
     unit = db.Column(db.String, nullable=False)
-    Fe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
+    recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"))
 
     def __init__(self, **kwargs):
@@ -64,6 +64,7 @@ class Metric(db.Model):
             "id": self.id,
             "recipe_id": self.recipe_id,
             "ingredient_id": self.ingredient_id,
+            "ingredient_name": self.ingredient_name,
             "amount": self.amount,
             "is_metric": self.is_metric,
             "unit": self.unit
