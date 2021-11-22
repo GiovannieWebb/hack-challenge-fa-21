@@ -9,7 +9,10 @@ import UIKit
 
 protocol UpdateIngredientsDelegate: class {
     func updateIngredients(newString: String)
+    func updateInstructions(newString: String)
+    func updateName(newString: String)
 }
+
 
 class ViewController: UIViewController {
     
@@ -44,7 +47,7 @@ class ViewController: UIViewController {
         let tabBarVC = UITabBarController()
 //        let vc2 = SecondViewController()
         let vc1 = HomeViewController()
-        let vc2 = SecondViewController()
+        let vc2 = ProfileViewController()
         tabBarVC.setViewControllers([vc1, vc2], animated: false)
         tabBarVC.modalPresentationStyle = .fullScreen
         
@@ -52,7 +55,7 @@ class ViewController: UIViewController {
     }
 
 }
-class SecondViewController: UIViewController {
+class ProfileViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,6 +67,15 @@ class SecondViewController: UIViewController {
 
 class HomeViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, UpdateIngredientsDelegate  {
     
+    func updateInstructions(newString: String) {
+        recipies[1][1].name = newString
+    }
+    
+    func updateName(newString: String) {
+        recipies[1][1].name = newString
+    }
+    
+    
     func updateIngredients(newString: String) {
         recipies[1][1].ingredients = newString
     }
@@ -73,7 +85,7 @@ class HomeViewController: UIViewController, UICollectionViewDataSource, UICollec
     
     var sections = ["Breakfast", "Lunch", "Dinner", "Snack"]
     var recipies : [[Recipie]] = [
-        [Recipie(name: "Baked Oatmeal", instructions: "Bake at 350 in oven 20 minutes ..", ingredients: "oats, milk, butter, sugar", cuisine: "Breakfast"),Recipie(name: "Baked Oatmeal", instructions: "Bake at 350 in oven 20 minutes ..", ingredients: "oats, milk, butter, sugar", cuisine: "Breakfast"), Recipie(name: "Baked Oatmeal", instructions: "Bake at 350 in oven 20 minutes ..", ingredients: "oats, milk, butter, sugar", cuisine: "Breakfast")  ],
+        [Recipie(name: "Name: Baked Oatmeal", instructions: "Instructions: Preheat the oven to 375 degrees. Grease a 9-inch square baking dish. Once the oven has finished preheating, pour the nuts onto a rimmed baking sheet.Toast for 4 to 5 minutes, until fragrant. In a medium mixing bowl, combine the oats, toasted nuts, cinnamon, baking powder, salt and nutmeg. Whisk to combine. In a smaller mixing bowl, combine the milk, maple syrup or honey, egg, half of the butter or coconut oil, and vanilla. Whisk until blended. (If you used coconut oil and it solidified in contact with the cold ingredients, briefly microwave the bowl in 30 second increments, just until the coconut oil melts again.) Reserve about ½ cup of the berries for topping the baked oatmeal, then arrange the remaining berries evenly over the bottom of the baking dish (no need to defrost frozen fruit first). Cover the fruit with the dry oat mixture, then drizzle the wet ingredients over the oats. Wiggle the baking dish to make sure the milk moves down through the oats, then gently pat down any dry oats resting on top. Scatter the remaining berries across the top. Sprinkle some raw sugar on top if you’d like some extra sweetness and crunch. Bake for 42 to 45 minutes (if using frozen berries, 45 to 50 minutes), until the top is nice and golden. Remove your baked oatmeal from the oven and let it cool for a few minutes. Drizzle the remaining melted butter on the top before serving. Serve as-is or with toppings of your choice. I prefer this baked oatmeal served warm, but it is also good at room temperature or chilled. This oatmeal keeps well in the refrigerator, covered, for 4 to 5 days. If desired, simply reheat individual portions in the microwave before serving.", ingredients: "Ingredients: oats, milk, butter, sugar", cuisine: "Breakfast"),Recipie(name: "Baked Oatmeal", instructions: "Bake at 350 in oven 20 minutes ..", ingredients: "oats, milk, butter, sugar", cuisine: "Breakfast"), Recipie(name: "Baked Oatmeal", instructions: "Bake at 350 in oven 20 minutes ..", ingredients: "oats, milk, butter, sugar", cuisine: "Breakfast")  ],
         [ Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine:"Lunch"), Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine:"Lunch")],
         [ Recipie(name: "Lobster Tail", instructions: "Cook until medium brown", ingredients: "lobster, butter, pan, pot, eggs fun ...", cuisine: "Dinner"), Recipie(name: "Lobster Tail", instructions: "Cook until medium brown", ingredients: "lobster, butter, pan, pot, eggs fun ...", cuisine: "Dinner"), Recipie(name: "Lobster Tail", instructions: "Cook until medium brown", ingredients: "lobster, butter, pan, pot, eggs fun ...", cuisine: "Dinner")],
         [ Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine: "Snack"), Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine: "Snack"), Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine: "Snack")]]
@@ -88,7 +100,7 @@ class HomeViewController: UIViewController, UICollectionViewDataSource, UICollec
         super.viewDidLoad()
         title = "Home"
         // .orange
-        view.backgroundColor = .systemTeal
+        view.backgroundColor = .systemGray
         // Do any additional setup after loading the view.
         
         let layout = UICollectionViewFlowLayout()
@@ -163,6 +175,7 @@ class HomeViewController: UIViewController, UICollectionViewDataSource, UICollec
         func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
             let numItemsPerRow: CGFloat = 2.0
             let size = (collectionView.frame.width - cellPadding) / numItemsPerRow
+//            let numItemsPerRow
             return CGSize(width: size, height: size)
         }
 
@@ -173,7 +186,7 @@ class HomeViewController: UIViewController, UICollectionViewDataSource, UICollec
         func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
             recipies[indexPath.section][indexPath.item].isSelected.toggle()
             if recipies[indexPath.section][indexPath.item].isSelected {
-                let vc = PresentViewController(delegate: self, placeholderText: recipies[indexPath.section][indexPath.item].ingredients)
+                let vc = PresentViewController(delegate: self, placeholderName: recipies[indexPath.section][indexPath.item].name, placeholderIngredients: recipies[indexPath.section][indexPath.item].ingredients, placeholderInstructions: recipies[indexPath.section][indexPath.item].instructions)
                 self.present(vc, animated: true, completion: nil)
             }
             collectionView.reloadData()
@@ -196,14 +209,20 @@ class PresentViewController: UIViewController {
 
     private var button = UIButton()
     private var label = UILabel()
-    private var textField = UITextField()
+    private var ingredientsField = UITextField()
+//    private var nameField = UITextField()
+    private var instructionsField = UITextView()
 
-    var placeholderText: String?
+    var placeholderIngredients: String?
+    var placeholderName: String?
+    var placeholderInstructions: String?
 
     // TODO 10: initialize placeholder text
-    init(delegate: UpdateIngredientsDelegate?, placeholderText: String) {
+    init(delegate: UpdateIngredientsDelegate?, placeholderName: String, placeholderIngredients: String, placeholderInstructions: String) {
         self.delegate = delegate
-        self.placeholderText = placeholderText
+        self.placeholderName = placeholderName
+        self.placeholderIngredients = placeholderIngredients
+        self.placeholderInstructions = placeholderInstructions
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -214,29 +233,45 @@ class PresentViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .white
+        view.backgroundColor = .lightGray
 
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Recipie"
+        label.text = placeholderName
         label.font = UIFont.systemFont(ofSize: 18)
         label.textColor = .black
         view.addSubview(label)
 
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Save", for: .normal)
+        button.setTitle("Done", for: .normal)
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = UIColor(red: 240/255, green: 240/255, blue: 240/255, alpha: 1)
         button.layer.cornerRadius = 4
         button.addTarget(self, action: #selector(dismissViewController), for: .touchUpInside)
         view.addSubview(button)
 
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.font = UIFont.systemFont(ofSize: 18)
+        ingredientsField.translatesAutoresizingMaskIntoConstraints = false
+        ingredientsField.font = UIFont.systemFont(ofSize: 18)
         // TODO 10: set placeholder text
-        textField.text = placeholderText
-        textField.borderStyle = .roundedRect
-        textField.textAlignment = .center
-        view.addSubview(textField)
+        ingredientsField.text = placeholderIngredients
+        ingredientsField.borderStyle = .roundedRect
+        ingredientsField.textAlignment = .center
+        view.addSubview(ingredientsField)
+        
+        instructionsField.translatesAutoresizingMaskIntoConstraints = false
+        instructionsField.font = UIFont.systemFont(ofSize: 18)
+        // TODO 10: set placeholder text
+        instructionsField.text = placeholderInstructions
+        instructionsField.layer.cornerRadius = 4
+//        instructionsField.layer
+        instructionsField.textAlignment = .center
+        view.addSubview(instructionsField)
+        
+//        nameField.translatesAutoresizingMaskIntoConstraints = false
+//        nameField.font = UIFont.systemFont(ofSize: 18)
+//        nameField.text = placeholderName
+//        nameField.borderStyle = .roundedRect
+//        nameField.textAlignment = .center
+//        view.addSubview(nameField)
 
         setUpConstraints()
     }
@@ -244,22 +279,48 @@ class PresentViewController: UIViewController {
     func setUpConstraints() {
         NSLayoutConstraint.activate([
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.topAnchor.constraint(equalTo: view.topAnchor, constant: 24)
+            label.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
+            label.heightAnchor.constraint(equalToConstant: 32)
+//            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+//            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
         ])
 
+        
+//        NSLayoutConstraint.activate([
+//            nameField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+//            nameField.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+//            nameField.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24),
+//            nameField.heightAnchor.constraint(equalToConstant: 32)
+//        ])
+
+        NSLayoutConstraint.activate([
+            ingredientsField.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 20),
+//            ingredientsField.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
+            ingredientsField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            ingredientsField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+//            ingredientsField.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24),
+            ingredientsField.heightAnchor.constraint(equalToConstant: 32)
+        ])
+        
+        NSLayoutConstraint.activate([
+            instructionsField.topAnchor.constraint(equalTo: ingredientsField.bottomAnchor, constant: 20),
+            instructionsField.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -60),
+            instructionsField.leadingAnchor.constraint(equalTo: ingredientsField.leadingAnchor),
+            instructionsField.trailingAnchor.constraint(equalTo: ingredientsField.trailingAnchor)
+//            instructionsField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+//            instructionsField.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+//            instructionsField.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24),
+//            instructionsField.heightAnchor.constraint(equalToConstant: 32)
+        ])
         NSLayoutConstraint.activate([
             button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            button.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -12),
-            button.widthAnchor.constraint(equalToConstant: 120),
-            button.heightAnchor.constraint(equalToConstant: 32)
+            button.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
+            button.leadingAnchor.constraint(equalTo: ingredientsField.leadingAnchor),
+            button.trailingAnchor.constraint(equalTo: ingredientsField.trailingAnchor)
+//            button.widthAnchor.constraint(equalToConstant: 120),
+//            button.heightAnchor.constraint(equalToConstant: 32)
         ])
-
-        NSLayoutConstraint.activate([
-            textField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            textField.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            textField.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24),
-            textField.heightAnchor.constraint(equalToConstant: 32)
-        ])
+        
     }
 
     @objc func dismissViewController() {

@@ -60,11 +60,11 @@
 		506A0CD32746ACCA008DF94D /* CornellCookbook */ = {
 			isa = PBXGroup;
 			children = (
-				506A0CE82748D457008DF94D /* RecipeCollectionViewCell.swift */,
-				506A0CEA2748D492008DF94D /* Recipie.swift */,
 				506A0CD42746ACCA008DF94D /* AppDelegate.swift */,
 				506A0CD62746ACCA008DF94D /* SceneDelegate.swift */,
 				506A0CEC274A3893008DF94D /* HeaderView.swift */,
+				506A0CEA2748D492008DF94D /* Recipie.swift */,
+				506A0CE82748D457008DF94D /* RecipeCollectionViewCell.swift */,
 				506A0CD82746ACCA008DF94D /* ViewController.swift */,
 				506A0CDD2746ACD5008DF94D /* Assets.xcassets */,
 				506A0CDF2746ACD5008DF94D /* LaunchScreen.storyboard */,
