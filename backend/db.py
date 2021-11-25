@@ -55,6 +55,11 @@ class Recipe(db.Model):
     __tablename__ = 'recipe'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
+    time = db.Column(db.Integer, nullable=False)
+    time_unit = db.Column(db.Integer, nullable=True)
+    difficulty = db.Column(db.String, nullable=False)
+    meal_type = db.Column(db.String, nullable=False)
+    cuisine = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     users_liked = db.relationship(
         "User", secondary=user_liked_recipes, back_populates="liked_recipes")
@@ -63,6 +68,11 @@ class Recipe(db.Model):
 
     def __init__(self, **kwargs):
         self.name = kwargs.get("name")
+        self.time = kwargs.get("time")
+        self.time_unit = kwargs.get("time_unit")
+        self.difficulty = kwargs.get("difficulty")
+        self.meal_type = kwargs.get("meal_type")
+        self.cuisine = kwargs.get("cuisine")
         self.user_id = kwargs.get("user_id")
 
     def serialize(self):
@@ -71,6 +81,8 @@ class Recipe(db.Model):
             "user_id": self.user_id,
             "name": self.name,
             "likes": len(self.users_liked),
+            "time": self.time,
+            "time_unit": self.time_unit,
             "ingredients": [i.serialize_without_recipe_id() for i in self.ingredients],
             "comments": [c.serialize_without_recipe_id() for c in self.comments]
         }
