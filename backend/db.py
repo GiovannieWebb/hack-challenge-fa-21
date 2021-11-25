@@ -4,15 +4,24 @@ db = SQLAlchemy()
 
 """
 TODO:
-  Password authentication
+  - Password authentication
+  - Images ???
+    - Demo on how to store images using Amazon S3
 """
 
 # recipe_metric = db.Table(
 #     "recipe_metric",
 #     db.Model.metadata,
 #     db.Column("recipe_id", db.Integer, db.ForeignKey("recipe.id")),
-#     db.Column("metric_d", db.Integer, db.ForeignKey("metric.id"))
+#     db.Column("metric_id", db.Integer, db.ForeignKey("metric.id"))
 # )
+
+user_liked_recipes = db.Table(
+    "user_liked_recipes",
+    db.Model.metadata,
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("recipe_id", db.Integer, db.ForeignKey("recipe.id"))
+)
 
 
 class User(db.Model):
@@ -21,8 +30,9 @@ class User(db.Model):
     username = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False)
     password = db.Column(db.String, nullable=True)
-    liked_recipes = db.relationship("Recipe")
     posted_recipes = db.relationship("Recipe", cascade="delete")
+    liked_recipes = db.relationship(
+        "Recipe", secondary=user_liked_recipes, back_populates="users_liked")
     comments = db.relationship("Comment", cascade="delete")
 
     def __init__(self, **kwargs):
@@ -41,66 +51,27 @@ class User(db.Model):
         }
 
 
-class Metric(db.Model):
-    __tablename__ = 'metric'
-    id = db.Column(db.Integer, primary_key=True)
-    ingredient_name = db.Column(db.String, nullable=False)
-    amount = db.Column(db.Integer, nullable=False)
-    is_metric = db.Column(db.Boolean, nullable=False)
-    unit = db.Column(db.String, nullable=False)
-    recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
-    ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"))
-
-    def __init__(self, **kwargs):
-        self.recipe_id = kwargs.get("recipe_id")
-        self.ingredient_id = kwargs.get("ingredient_id")
-        self.ingredient_name = kwargs.get("ingredient_name")
-        self.amount = kwargs.get("amount")
-        self.is_metric = kwargs.get("is_metric")
-        self.unit = kwargs.get("unit")
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "recipe_id": self.recipe_id,
-            "ingredient_id": self.ingredient_id,
-            "ingredient_name": self.ingredient_name,
-            "amount": self.amount,
-            "is_metric": self.is_metric,
-            "unit": self.unit
-        }
-
-    def serialize_without_recipe_id(self):
-        return {
-            "id": self.id,
-            "ingredient_id": self.ingredient_id,
-            "amount": self.amount,
-            "is_metric": self.is_metric,
-            "unit": self.unit
-        }
-
-
 class Recipe(db.Model):
     __tablename__ = 'recipe'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-    likes = db.Column(db.Integer, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    users_liked = db.relationship(
+        "User", secondary=user_liked_recipes, back_populates="liked_recipes")
     comments = db.relationship("Comment", cascade="delete")
-    contents = db.relationship("Metric", cascade="delete")
+    ingredients = db.relationship("Ingredient", cascade="delete")
 
     def __init__(self, **kwargs):
-        self.likes = 0
         self.name = kwargs.get("name")
         self.user_id = kwargs.get("user_id")
 
     def serialize(self):
         return {
             "id": self.id,
-            "name": self.name,
-            "likes": self.likes,
             "user_id": self.user_id,
-            "contents": [m.serialize_without_recipe_id() for m in self.contents],
+            "name": self.name,
+            "likes": len(self.users_liked),
+            "ingredients": [i.serialize_without_recipe_id() for i in self.ingredients],
             "comments": [c.serialize_without_recipe_id() for c in self.comments]
         }
 
@@ -140,11 +111,11 @@ class Comment(db.Model):
         }
 
 
-class Ingredient(db.Model):
-    __tablename__ = 'ingredient'
+class IngredientName(db.Model):
+    __tablename__ = 'ingredient_name'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-    associated_metrics = db.relationship("Metric", cascade="delete")
+    # associated_metrics = db.relationship("Ingredient", cascade="delete")
 
     def __init__(self, **kwargs):
         self.name = kwargs.get("name")
@@ -153,4 +124,45 @@ class Ingredient(db.Model):
         return {
             "id": self.id,
             "name": self.name
+        }
+
+
+class Ingredient(db.Model):
+    __tablename__ = 'ingredient'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
+    is_metric = db.Column(db.Boolean, nullable=False)
+    unit = db.Column(db.String, nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
+    ingredient_name_id = db.Column(
+        db.Integer, db.ForeignKey("ingredient_name.id"))
+
+    def __init__(self, **kwargs):
+        self.recipe_id = kwargs.get("recipe_id")
+        self.ingredient_name_id = kwargs.get("ingredient_name_id")
+        self.name = kwargs.get("name")
+        self.amount = kwargs.get("amount")
+        self.is_metric = kwargs.get("is_metric")
+        self.unit = kwargs.get("unit")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "recipe_id": self.recipe_id,
+            "ingredient_name_id": self.ingredient_name_id,
+            "name": self.name,
+            "amount": self.amount,
+            "is_metric": self.is_metric,
+            "unit": self.unit
+        }
+
+    def serialize_without_recipe_id(self):
+        return {
+            "id": self.id,
+            "ingredient_name_id": self.ingredient_name_id,
+            "name": self.name,
+            "amount": self.amount,
+            "is_metric": self.is_metric,
+            "unit": self.unit
         }

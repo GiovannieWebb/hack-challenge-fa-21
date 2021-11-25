@@ -1,11 +1,7 @@
 import json
 
 from db import db
-from db import User
-from db import Recipe
-from db import Ingredient
-from db import Comment
-from db import Metric
+from db import User, Recipe, Ingredient, Comment, IngredientName
 from flask import Flask
 from flask import request
 
@@ -86,6 +82,34 @@ def get_recipes():
     )
 
 
+@app.route("/api/recipes/liked/<int:user_id>/")
+def get_liked_recipes_from_user(user_id: int):
+    """
+    Gets all recipes that a user has liked.
+    Error 404 if this user does not exist.
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response("User not found!", 404)
+    return success_response({
+        "liked_recipes": [lr.serialize() for lr in user.liked_recipes]
+    })
+
+
+@app.route("/api/recipes/posted/<int:user_id>/")
+def get_posted_recipes_from_user(user_id: int):
+    """
+    Gets all recipes that a user has posted.
+    Error 404 if this user does not exist.
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response("User not found!", 404)
+    return success_response({
+        "posted_recipes": [pr.serialize() for pr in user.posted_recipes]
+    })
+
+
 @app.route("/api/recipes/<int:user_id>/", methods=["POST"])
 def add_recipe_for_user(user_id: int):
     """
@@ -151,22 +175,89 @@ def add_recipe_for_user(user_id: int):
     db.session.refresh(new_recipe)
     recipe_id = new_recipe.id
     for ingredient in ingredients:
-        db_ingredient = Ingredient.query.filter_by(
+        db_ingredient_name = IngredientName.query.filter_by(
             name=ingredient.get("name")).first()
-        if db_ingredient is None:
-            db_ingredient = Ingredient(name=ingredient.get("name"))
-            db.session.add(db_ingredient)
-        new_metric = Metric(recipe_id=recipe_id,
-                            ingredient_id=db_ingredient.id,
-                            ingredient_name=db_ingredient.name,
-                            amount=ingredient.get("amount"),
-                            is_metric=ingredient.get("is_metric"),
-                            unit=ingredient.get("unit"))
-        db.session.add(new_metric)
-        db_ingredient.associated_metrics.append(new_metric)
-        new_recipe.contents.append(new_metric)
+        if db_ingredient_name is None:
+            db_ingredient_name = IngredientName(name=ingredient.get("name"))
+            db.session.add(db_ingredient_name)
+            db.session.flush()
+            db.session.refresh(db_ingredient_name)
+        new_ingredient = Ingredient(recipe_id=recipe_id,
+                                    ingredient_name_id=db_ingredient_name.id,
+                                    name=db_ingredient_name.name,
+                                    amount=ingredient.get("amount"),
+                                    is_metric=ingredient.get("is_metric"),
+                                    unit=ingredient.get("unit"))
+        db.session.add(new_ingredient)
+        # db_ingredient_name.associated_metrics.append(new_ingredient)
+        new_recipe.ingredients.append(new_ingredient)
     db.session.commit()
     return success_response(new_recipe.serialize())
+
+
+@app.route("/api/recipes/<int:recipe_id>/", methods=["DELETE"])
+def delete_recipe(recipe_id):
+    """
+    Deletes recipe with associated recipe_id.
+    This removes the recipe entirely from the database.
+    Error 404 if this recipe never existed to begin with.
+    Returns the deleted recipe.
+    """
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
+    if recipe is None:
+        return failure_response("Recipe not found!", 404)
+    db.session.delete(recipe)
+    db.session.commit()
+    return success_response(recipe.serialize())
+
+
+@app.route("/api/recipes/<int:user_id>/like/<int:recipe_id>/", methods=["POST"])
+def like_recipe(user_id, recipe_id):
+    """
+    Have the user with user_id like the recipe with recipe_id.
+    Returns the liked recipe.
+    Error 404 if either the user doesn't exist or recipe doesn't exist.
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response("User not found!", 404)
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
+    if recipe is None:
+        return failure_response("Recipe not found!", 404)
+    already_liked = False
+    for r in user.liked_recipes:
+        if recipe_id == r.id:
+            already_liked = True
+            break
+    if already_liked:
+        return success_response(recipe.serialize())
+
+    user.liked_recipes.append(recipe)
+    db.session.commit()
+    return success_response(recipe.serialize())
+
+
+@app.route("/api/recipes/<int:user_id>/unlike/<int:recipe_id>/", methods=["POST"])
+def unlike_recipe(user_id, recipe_id):
+    """
+    Have the user with user_id unlike the recipe with recipe_id.
+    Returns the unliked recipe.
+    Error 404 if either the user doesn't exist or recipe doesn't exist.
+    Error 403 if the user hasn't liked this recipe
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response("User not found!", 404)
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
+    if recipe is None:
+        return failure_response("Recipe not found!", 404)
+    for r in user.liked_recipes:
+        if r.id == recipe.id:
+            user.liked_recipes.remove(r)
+            db.session.commit()
+            return success_response(recipe.serialize())
+    db.session.commit()
+    return failure_response("This user has not liked this recipe!", 403)
 
 
 @app.route("/api/ingredients/")
@@ -189,7 +280,7 @@ def get_ingredients_for_specific_recipe(recipe_id):
     if recipe is None:
         return failure_response("Recipe not found!", 404)
     return success_response(
-        {"ingredients": [m.serialize() for m in recipe.contents]}
+        {"ingredients": [i.serialize() for i in recipe.ingredients]}
     )
 
 
@@ -203,13 +294,57 @@ def get_comments():
     )
 
 
-@app.route("/api/comments/<int:user_id>/<int:recipe_id>/", methods=["POST"])
+@app.route("/api/comments/<int:user_id>/recipe/<int:recipe_id>/", methods=["POST"])
 def add_comment_from_user_to_recipe(user_id, recipe_id):
-    pass
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response("User not found!", 404)
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
+    if recipe is None:
+        return failure_response("Recipe not found!", 404)
+    body = json.loads(request.data)
+    text = body.get("text")
+    if text is None or len(text) == 0 or text.isspace():
+        return failure_response("Text not found")
+    if len(text) == 0 or text.isspace():
+        return failure_response("Text cannot be empty or contain only whitespace!")
+    new_comment = Comment(text=text, user_id=user_id, recipe_id=recipe_id)
+    db.session.add(new_comment)
+    recipe.comments.append(new_comment)
+    user.comments.append(new_comment)
+    db.session.commit()
+    return success_response(new_comment.serialize())
 
 
-@app.route("/api/ingredients/", methods=["POST"])
-def add_ingredient():
+@app.route("/api/comments/<int:comment_id>/", methods=["DELETE"])
+def delete_comment(comment_id):
+    """
+    Deletes comment with associated comment_id.
+    This removes the comments entirely from the database.
+    Error 404 if this comment never existed to begin with.
+    Returns the deleted comment.
+    """
+    comment = Comment.query.filter_by(id=comment_id).first()
+    if comment is None:
+        return failure_response("Comment not found!", 404)
+    db.session.delete(comment)
+    db.session.commit()
+    return success_response(comment.serialize())
+
+
+@app.route("/api/ingredients/name/")
+def get_ingredient_names():
+    """
+    Gets all ingredient names.
+    """
+    return success_response(
+        {"ingredient_names": [i_n.serialize()
+                              for i_n in IngredientName.query.all()]}
+    )
+
+
+@app.route("/api/ingredients/name/", methods=["POST"])
+def add_ingredient_name():
     """
     Adds an ingredient.\n
     BODY:\n
@@ -224,13 +359,13 @@ def add_ingredient():
     if name is None:
         return failure_response("Ingredient name not found!", 400)
     name = name.lower()
-    ingredient = Ingredient.query.filter_by(name=name).first()
-    if ingredient is not None:
+    ingredient_name = IngredientName.query.filter_by(name=name).first()
+    if ingredient_name is not None:
         return failure_response("Ingredient with this name already exists!", 404)
-    new_ingredient = Ingredient(name=name)
-    db.session.add(new_ingredient)
+    new_ingredient_name = IngredientName(name=name)
+    db.session.add(new_ingredient_name)
     db.session.commit()
-    return success_response(new_ingredient.serialize(), 201)
+    return success_response(new_ingredient_name.serialize(), 201)
 
 
 if __name__ == "__main__":
