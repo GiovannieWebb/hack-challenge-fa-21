@@ -28,6 +28,8 @@ def failure_response(message, code=404):
 
 # your routes here
 
+# ------------------------------ GET METHODS --------------------------------- #
+
 
 @app.route("/")
 @app.route("/api/users/")
@@ -38,6 +40,137 @@ def get_users():
     return success_response(
         {"users": [u.serialize() for u in User.query.all()]}
     )
+
+
+@app.route("/api/recipes/")
+def get_recipes():
+    """
+    Returns all recipes.
+    """
+    return success_response(
+        {"recipes": [r.serialize() for r in Recipe.query.all()]}
+    )
+
+
+@app.route("/api/ingredients/name/")
+def get_ingredient_names():
+    """
+    Gets all ingredient names.
+    """
+    return success_response(
+        {"ingredient_names": [i_n.serialize()
+                              for i_n in IngredientName.query.all()]}
+    )
+
+
+@app.route("/api/ingredients/")
+def get_ingredients():
+    """
+    Returns all ingredients.
+    """
+    return success_response(
+        {"ingredients": [i.serialize() for i in Ingredient.query.all()]}
+    )
+
+
+@app.route("/api/recipes/liked/<int:user_id>/")
+def get_liked_recipes_from_user(user_id: int):
+    """
+    Gets all recipes that a user has liked.
+    Error 404 if this user does not exist.
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response("User not found!", 404)
+    return success_response({
+        "liked_recipes": [lr.serialize() for lr in user.liked_recipes]
+    })
+
+
+@app.route("/api/recipes/posted/<int:user_id>/")
+def get_posted_recipes_from_user(user_id: int):
+    """
+    Gets all recipes that a user has posted.
+    Error 404 if this user does not exist.
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response("User not found!", 404)
+    return success_response({
+        "posted_recipes": [pr.serialize() for pr in user.posted_recipes]
+    })
+
+
+@app.route("/api/ingredients/<int:recipe_id>/")
+def get_ingredients_for_specific_recipe(recipe_id):
+    """
+    Gets all ingredients for a specific recipe.
+    Error 404 if recipe with recipe_id does not exist
+    """
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
+    if recipe is None:
+        return failure_response("Recipe not found!", 404)
+    return success_response(
+        {"ingredients": [i.serialize() for i in recipe.ingredients]}
+    )
+
+
+@app.route("/api/recipes/<int:start>/duration/<int:end>/")
+def get_recipes_with_duration(start, end):
+    """
+    Returns all dishes (recipes) that take between start and end to make.
+    BODY:
+    {
+        time_unit: <string>
+    }
+    Error 400 if time_unit not specified
+    """
+    body = json.loads(request.data)
+    time_unit = body.get("time_unit")
+    if time_unit is None:
+        return failure_response("Time unit not specified!")
+    recipes = db.session.query(Recipe).filter(Recipe.time_unit == time_unit,
+                                              Recipe.time >= start,
+                                              Recipe.time <= end)
+    return success_response({"recipes": [r.serialize() for r in recipes.all()]})
+
+
+@app.route("/api/comments/")
+def get_comments():
+    """
+    Returns all comments.
+    """
+    return success_response(
+        {"comments": [c.serialize() for c in Comment.query.all()]}
+    )
+
+
+# ------------------------------ POST METHODS -------------------------------- #
+
+
+@app.route("/api/ingredients/name/", methods=["POST"])
+def add_ingredient_name():
+    """
+    Adds an ingredient.\n
+    BODY:\n
+    {
+        "name": <string>
+    }\n
+    Error 400 if name is not specified
+    Error 404 if ingredient with this name already exists
+    """
+    body = json.loads(request.data)
+    name = body.get("name")
+    if name is None:
+        return failure_response("Ingredient name not found!", 400)
+    name = name.lower()
+    ingredient_name = IngredientName.query.filter_by(name=name).first()
+    if ingredient_name is not None:
+        return failure_response("Ingredient with this name already exists!", 404)
+    new_ingredient_name = IngredientName(name=name)
+    db.session.add(new_ingredient_name)
+    db.session.commit()
+    return success_response(new_ingredient_name.serialize(), 201)
 
 
 @app.route("/api/users/", methods=["POST"])
@@ -72,44 +205,6 @@ def add_user():
     return success_response(new_user.serialize(), 201)
 
 
-@app.route("/api/recipes/")
-def get_recipes():
-    """
-    Returns all recipes.
-    """
-    return success_response(
-        {"recipes": [r.serialize() for r in Recipe.query.all()]}
-    )
-
-
-@app.route("/api/recipes/liked/<int:user_id>/")
-def get_liked_recipes_from_user(user_id: int):
-    """
-    Gets all recipes that a user has liked.
-    Error 404 if this user does not exist.
-    """
-    user = User.query.filter_by(id=user_id).first()
-    if user is None:
-        return failure_response("User not found!", 404)
-    return success_response({
-        "liked_recipes": [lr.serialize() for lr in user.liked_recipes]
-    })
-
-
-@app.route("/api/recipes/posted/<int:user_id>/")
-def get_posted_recipes_from_user(user_id: int):
-    """
-    Gets all recipes that a user has posted.
-    Error 404 if this user does not exist.
-    """
-    user = User.query.filter_by(id=user_id).first()
-    if user is None:
-        return failure_response("User not found!", 404)
-    return success_response({
-        "posted_recipes": [pr.serialize() for pr in user.posted_recipes]
-    })
-
-
 @app.route("/api/recipes/<int:user_id>/", methods=["POST"])
 def add_recipe_for_user(user_id: int):
     """
@@ -119,6 +214,11 @@ def add_recipe_for_user(user_id: int):
     BODY:
         {
             "name": <string>,
+            "time": <integer>,
+            "time_unit": <string>,
+            "difficulty: <string>,
+            "meal_type": <string>,
+            "cuisine": <string>,
             "ingredients": [
                 {
                     "name": <string>,
@@ -152,6 +252,21 @@ def add_recipe_for_user(user_id: int):
     name = body.get("name")
     if name is None:
         return failure_response("Recipe name not specified!", 400)
+    time = body.get("time")
+    if time is None:
+        return failure_response("Time not specified!", 400)
+    time_unit = body.get("time_unit")
+    if time_unit is None:
+        return failure_response("Time unit not specified!", 400)
+    difficulty = body.get("difficulty")
+    if difficulty is None:
+        return failure_response("Difficulty not specified!", 400)
+    meal_type = body.get("meal_type")
+    if meal_type is None:
+        return failure_response("Meal type not specified!", 400)
+    cuisine = body.get("cuisine")
+    if cuisine is None:
+        return failure_response("Cuisine not specified!", 400)
     ingredients = body.get("ingredients")
     if ingredients is None:
         return failure_response("Ingredients list not specified!", 400)
@@ -169,7 +284,13 @@ def add_recipe_for_user(user_id: int):
         if im is None:
             return failure_response("Metric vs Imperial not specified for a given ingredient!", 400)
 
-    new_recipe = Recipe(name=name, user_id=user_id)
+    new_recipe = Recipe(name=name,
+                        time=time,
+                        time_unit=time_unit,
+                        difficulty=difficulty,
+                        meal_type=meal_type,
+                        cuisine=cuisine,
+                        user_id=user_id)
     db.session.add(new_recipe)
     db.session.flush()
     db.session.refresh(new_recipe)
@@ -193,22 +314,6 @@ def add_recipe_for_user(user_id: int):
         new_recipe.ingredients.append(new_ingredient)
     db.session.commit()
     return success_response(new_recipe.serialize())
-
-
-@app.route("/api/recipes/<int:recipe_id>/", methods=["DELETE"])
-def delete_recipe(recipe_id):
-    """
-    Deletes recipe with associated recipe_id.
-    This removes the recipe entirely from the database.
-    Error 404 if this recipe never existed to begin with.
-    Returns the deleted recipe.
-    """
-    recipe = Recipe.query.filter_by(id=recipe_id).first()
-    if recipe is None:
-        return failure_response("Recipe not found!", 404)
-    db.session.delete(recipe)
-    db.session.commit()
-    return success_response(recipe.serialize())
 
 
 @app.route("/api/recipes/<int:user_id>/like/<int:recipe_id>/", methods=["POST"])
@@ -260,40 +365,6 @@ def unlike_recipe(user_id, recipe_id):
     return failure_response("This user has not liked this recipe!", 403)
 
 
-@app.route("/api/ingredients/")
-def get_ingredients():
-    """
-    Returns all ingredients.
-    """
-    return success_response(
-        {"ingredients": [i.serialize() for i in Ingredient.query.all()]}
-    )
-
-
-@app.route("/api/ingredients/<int:recipe_id>/")
-def get_ingredients_for_specific_recipe(recipe_id):
-    """
-    Gets all ingredients for a specific recipe.
-    Error 404 if recipe with recipe_id does not exist
-    """
-    recipe = Recipe.query.filter_by(id=recipe_id).first()
-    if recipe is None:
-        return failure_response("Recipe not found!", 404)
-    return success_response(
-        {"ingredients": [i.serialize() for i in recipe.ingredients]}
-    )
-
-
-@app.route("/api/comments/")
-def get_comments():
-    """
-    Returns all comments.
-    """
-    return success_response(
-        {"comments": [c.serialize() for c in Comment.query.all()]}
-    )
-
-
 @app.route("/api/comments/<int:user_id>/recipe/<int:recipe_id>/", methods=["POST"])
 def add_comment_from_user_to_recipe(user_id, recipe_id):
     user = User.query.filter_by(id=user_id).first()
@@ -316,6 +387,41 @@ def add_comment_from_user_to_recipe(user_id, recipe_id):
     return success_response(new_comment.serialize())
 
 
+# -------------------------------- DEL METHODS ------------------------------- #
+
+
+@app.route("/api/users/<int:user_id>/", methods=["DELETE"])
+def delete_user(user_id):
+    """
+    Deletes user with associated user_id.
+    This removes the user entirely from the database.
+    Error 404 if this user never existed to begin with.
+    Returns the deleted user.
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response("User not found!", 404)
+    db.session.delete(user)
+    db.session.commit()
+    return success_response(user.serialize())
+
+
+@app.route("/api/recipes/<int:recipe_id>/", methods=["DELETE"])
+def delete_recipe(recipe_id):
+    """
+    Deletes recipe with associated recipe_id.
+    This removes the recipe entirely from the database.
+    Error 404 if this recipe never existed to begin with.
+    Returns the deleted recipe.
+    """
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
+    if recipe is None:
+        return failure_response("Recipe not found!", 404)
+    db.session.delete(recipe)
+    db.session.commit()
+    return success_response(recipe.serialize())
+
+
 @app.route("/api/comments/<int:comment_id>/", methods=["DELETE"])
 def delete_comment(comment_id):
     """
@@ -332,40 +438,21 @@ def delete_comment(comment_id):
     return success_response(comment.serialize())
 
 
-@app.route("/api/ingredients/name/")
-def get_ingredient_names():
+@app.route("/api/ingredients/name/<int:ingredient_name_id>/", methods=["DELETE"])
+def delete_ingredient_name(ingredient_name_id):
     """
-    Gets all ingredient names.
+    Deletes ingredient name with associated ingredient_name_id.
+    This removes the ingredient name entirely from the database.
+    Error 404 if this ingredient name never existed to begin with.
+    Returns the deleted ingredient name.
     """
-    return success_response(
-        {"ingredient_names": [i_n.serialize()
-                              for i_n in IngredientName.query.all()]}
-    )
-
-
-@app.route("/api/ingredients/name/", methods=["POST"])
-def add_ingredient_name():
-    """
-    Adds an ingredient.\n
-    BODY:\n
-    {
-        "name": <string>
-    }\n
-    Error 400 if name is not specified
-    Error 404 if ingredient with this name already exists
-    """
-    body = json.loads(request.data)
-    name = body.get("name")
-    if name is None:
-        return failure_response("Ingredient name not found!", 400)
-    name = name.lower()
-    ingredient_name = IngredientName.query.filter_by(name=name).first()
-    if ingredient_name is not None:
-        return failure_response("Ingredient with this name already exists!", 404)
-    new_ingredient_name = IngredientName(name=name)
-    db.session.add(new_ingredient_name)
+    ingredient_name = IngredientName.query.filter_by(
+        id=ingredient_name_id).first()
+    if ingredient_name is None:
+        return failure_response("Ingredient name not found!", 404)
+    db.session.delete(ingredient_name)
     db.session.commit()
-    return success_response(new_ingredient_name.serialize(), 201)
+    return success_response(ingredient_name.serialize())
 
 
 if __name__ == "__main__":
