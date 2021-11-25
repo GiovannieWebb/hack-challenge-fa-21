@@ -1,7 +1,7 @@
 import json
 
 from db import db
-from db import User, Recipe, Ingredient, Comment, IngredientName
+from db import User, Recipe, Ingredient, Instruction, Comment, IngredientName
 from flask import Flask
 from flask import request
 
@@ -233,22 +233,38 @@ def add_recipe_for_user(user_id: int):
                     "is_metric": <boolean>
                 },
                 ...
+            ],
+            "instructions": [
+                {
+                    "step_number": <integer>
+                    "step": <string>
+                },
+                {
+                    "step_number": <integer>
+                    "step": <string>
+                },
+                ...
             ] 
         }
     Error 404 is user with user_id not found\n
-    Error 400 if "name" not specified\n
-    Error 400 if "ingredients" not specified\n
-    Error 400 if "name", "unit", or "amount" are not specified for a particular
-    ingredient
+    Error 400 if any of the fields above are not specified\n
+        Error 400 if "name", "unit", or "amount" are not specified for a 
+        particular ingredient
+        Error 400 if any instruction is not a string or is all whitespace
 
-    If an ingredient doesn't exist, add that ingredient to the ingredients table
+    If an ingredient name doesn't exist, add that ingredient name to the 
+    ingredient names table
 
     Returns the newly added recipe
     """
+    # Check if user is valid
     user = User.query.filter_by(id=user_id).first()
     if user is None:
         return failure_response("User not found!")
+
     body = json.loads(request.data)
+
+    # Check all parts of body to see if body is valid
     name = body.get("name")
     if name is None:
         return failure_response("Recipe name not specified!", 400)
@@ -267,6 +283,9 @@ def add_recipe_for_user(user_id: int):
     cuisine = body.get("cuisine")
     if cuisine is None:
         return failure_response("Cuisine not specified!", 400)
+    instructions = body.get("instructions")
+    if instructions is None:
+        return failure_response("Instructions not specified!", 400)
     ingredients = body.get("ingredients")
     if ingredients is None:
         return failure_response("Ingredients list not specified!", 400)
@@ -283,6 +302,16 @@ def add_recipe_for_user(user_id: int):
         im = i.get("is_metric")
         if im is None:
             return failure_response("Metric vs Imperial not specified for a given ingredient!", 400)
+    for ins in instructions:
+        sn = ins.get("step_number")
+        if sn is None:
+            return failure_response("Step number not specified for a given instruction!", 400)
+        s = ins.get("step")
+        if s is None:
+            return failure_response("Step not given for a given instruction!", 400)
+        if len(s) == 0 or s.isspace():
+            return failure_response("No step can be only whitespace!", 400)
+    # End of body check (it's a lot, I know)
 
     new_recipe = Recipe(name=name,
                         time=time,
@@ -291,10 +320,12 @@ def add_recipe_for_user(user_id: int):
                         meal_type=meal_type,
                         cuisine=cuisine,
                         user_id=user_id)
+    # need to reload the new recipe so we can receive it's newly assigned id
     db.session.add(new_recipe)
     db.session.flush()
     db.session.refresh(new_recipe)
     recipe_id = new_recipe.id
+    # add ingredients
     for ingredient in ingredients:
         db_ingredient_name = IngredientName.query.filter_by(
             name=ingredient.get("name")).first()
@@ -312,6 +343,14 @@ def add_recipe_for_user(user_id: int):
         db.session.add(new_ingredient)
         # db_ingredient_name.associated_metrics.append(new_ingredient)
         new_recipe.ingredients.append(new_ingredient)
+
+    # add instructions
+    for instruction in instructions:
+        new_step = Instruction(recipe_id=recipe_id,
+                               step_number=instruction.get("step_number"),
+                               step=instruction.get("step"))
+        db.session.add(new_step)
+        new_recipe.instructions.append(new_step)
     db.session.commit()
     return success_response(new_recipe.serialize())
 
@@ -375,7 +414,7 @@ def add_comment_from_user_to_recipe(user_id, recipe_id):
         return failure_response("Recipe not found!", 404)
     body = json.loads(request.data)
     text = body.get("text")
-    if text is None or len(text) == 0 or text.isspace():
+    if text is None:
         return failure_response("Text not found")
     if len(text) == 0 or text.isspace():
         return failure_response("Text cannot be empty or contain only whitespace!")
