@@ -1,7 +1,10 @@
 import json
+from datetime import datetime
+from time import mktime
 
 from db import db
 from db import User, Recipe, Ingredient, Instruction, Comment, IngredientName
+from constants import Constants
 from flask import Flask
 from flask import request
 
@@ -82,7 +85,8 @@ def get_all_recipes():
                     "instructions": <instructions-list-without-recipe-ids>,
                     "comments": <comments-list-without-recipe-ids>,
                     "number_of_likes": <integer>,
-                    "users_liked": <users-list-without-recipes>
+                    "users_liked": <users-list-without-recipes>,
+                    "created_at": <integer> <- unix time (time since epoch in 1970)
                 },
                 ...
             ]
@@ -138,7 +142,8 @@ def get_liked_recipes_from_user(user_id: int):
                     "instructions": <instructions-list-without-recipe-ids>,
                     "comments": <comments-list-without-recipe-ids>,
                     "number_of_likes": <integer>,
-                    "users_liked": <users-list-without-recipes>
+                    "users_liked": <users-list-without-recipes>,
+                    "created_at": <integer> <- unix time (time since epoch in 1970)
                 },
                 ...
             ]
@@ -176,7 +181,8 @@ def get_posted_recipes_from_user(user_id: int):
                     "instructions": <instructions-list-without-recipe-ids>,
                     "comments": <comments-list-without-recipe-ids>,
                     "number_of_likes": <integer>,
-                    "users_liked": <users-list-without-recipes>
+                    "users_liked": <users-list-without-recipes>,
+                    "created_at": <integer> <- unix time (time since epoch in 1970)
                 },
                 ...
             ]
@@ -324,6 +330,77 @@ def get_comments_by_user(user_id: int):
     })
 
 
+@app.route("/api/recipes/filter/")
+def get_recipes_by_filter():
+    """
+    Description: Gets all recipes matching a certain criteria described by 
+    the filters. Returns the list of recipes that match the given filters.
+    Method: GET
+    Query Parameters: None
+    Body: {
+        "difficulties": [], <- list of difficulty levels
+        "meal_types": [], <- list of meal types
+        "cuisines": [], <- list of cuisines
+        "time": {
+            "lower": <integer>,
+            "upper": <integer>
+        },
+        "likes": {
+            "lower": <integer>,
+            "upper": <integer>
+        }
+        "created": {
+            "before": <integer>, <- unix time (time since 1970 epoch)
+            "after": <integer>, <- unix time (time since 1970 epoch)
+        }
+    }
+    Return: {
+        "recipes": [
+            {
+                "id": <integer>,
+                "user_id": <integer>,
+                "name": <string>,
+                "time": <integer>,
+                "time_unit": <string>,
+                "difficulty": <string>,
+                "meal_type": <string>,
+                "cuisine": <string>,
+                "ingredients": <ingredients-list-without-recipe-ids>,
+                "instructions": <instructions-list-without-recipe-ids>,
+                "comments": <list-of-comments-without-recipe-ids>,
+                "number_of_likes": <integer>,
+                "users_liked": [],
+                "created_at": <integer> <- unix time (time since epoch in 1970)
+            },
+            ...
+        ]
+    }
+    Success Response: 200
+    Errors: None
+    """
+    body = json.loads(request.data)
+    difficulties = body.get("difficulties", Constants.valid_difficulty_levels)
+    meal_types = body.get("meal_types", Constants.valid_meal_types)
+    cuisines = body.get("cuisines", Constants.valid_cuisines)
+    time = body.get("time", Constants.default_time)
+    likes = body.get("likes", Constants.default_likes)
+    created = body.get("created", Constants.default_created)
+
+    recipes = Recipe.query.filter(
+        Recipe.difficulty.in_(tuple(difficulties)),
+        Recipe.meal_type.in_(tuple(meal_types)),
+        Recipe.cuisine.in_(tuple(cuisines)),
+        Recipe.time >= time.get("lower"),
+        Recipe.time <= time.get("upper"),
+        Recipe.number_of_likes >= likes.get("lower"),
+        Recipe.number_of_likes <= likes.get("upper"),
+        Recipe.created_at >= created.get("after"),
+        Recipe.created_at <= created.get("before")
+    )
+
+    return success_response({"recipes": [r.serialize() for r in recipes.all()]})
+
+
 # ------------------------------ POST METHODS -------------------------------- #
 
 
@@ -355,7 +432,7 @@ def add_ingredient_name():
 @app.route("/api/users/", methods=["POST"])
 def add_user():
     """
-    Description: Adds a new user to the database. Returns the newly created 
+    Description: Adds a new user to the database. Returns the newly created
     user.
     Method: POST
     Query Parameters: None
@@ -397,7 +474,7 @@ def add_user():
 @app.route("/api/recipes/<int:user_id>/", methods=["POST"])
 def add_recipe_for_user(user_id: int):
     """
-    Description: Adds a recipe to a specific user profile. 
+    Description: Adds a recipe to a specific user profile.
     Returns the newly created recipe.
     Method: POST
     Query Parameters: user_id
@@ -422,7 +499,7 @@ def add_recipe_for_user(user_id: int):
                     "step": <string>
                 },
                 ...
-            ] 
+            ]
         }
     Return: {
         "id": <integer>,
@@ -437,7 +514,8 @@ def add_recipe_for_user(user_id: int):
         "instructions": <instructions-list-without-recipe-ids>,
         "comments": [],
         "number_of_likes": 0,
-        "users_liked": []
+        "users_liked": [],
+        "created_at": <integer> <- unix time (time since epoch in 1970)
     }
     Success Response: 200
     Error Responses: 404 if user not found, 400 if any fields not specified
@@ -499,12 +577,13 @@ def add_recipe_for_user(user_id: int):
     # End of body check (it's a lot, I know)
 
     new_recipe = Recipe(name=name,
+                        user_id=user_id,
                         time=time,
                         time_unit=time_unit,
                         difficulty=difficulty,
                         meal_type=meal_type,
                         cuisine=cuisine,
-                        user_id=user_id)
+                        created_at=int(mktime(datetime.now().timetuple())))
     # need to reload the new recipe so we can receive it's newly assigned id
     db.session.add(new_recipe)
     db.session.flush()
@@ -540,11 +619,11 @@ def add_recipe_for_user(user_id: int):
     return success_response(new_recipe.serialize(), 201)
 
 
-@app.route("/api/recipes/<int:user_id>/like/<int:recipe_id>/", methods=["POST"])
+@ app.route("/api/recipes/<int:user_id>/like/<int:recipe_id>/", methods=["POST"])
 def like_recipe(user_id: int, recipe_id: int):
     """
     Description: Has a specific user like a specific recipe. Does nothing if the
-    user has already liked this recipe. Returns the liked recipe. 
+    user has already liked this recipe. Returns the liked recipe.
     Method: POST
     Query Parameters: user_id, recipe_id
     Body: None
@@ -561,7 +640,8 @@ def like_recipe(user_id: int, recipe_id: int):
         "instructions": <instructions-list-without-recipe-ids>,
         "comments": <comment-list-without-recipe-ids>,
         "number_of_likes": <integer>,
-        "users_liked": <user-list-without-recipes>
+        "users_liked": <user-list-without-recipes>,
+        "created_at": <integer> <- unix time (time since epoch in 1970)
     }
     Success Response: 200
     Error Responses: 404 if user or recipe not found
@@ -580,16 +660,17 @@ def like_recipe(user_id: int, recipe_id: int):
     if already_liked:
         return success_response(recipe.serialize())
 
+    recipe.number_of_likes += 1
     user.liked_recipes.append(recipe)
     db.session.commit()
     return success_response(recipe.serialize())
 
 
-@app.route("/api/recipes/<int:user_id>/unlike/<int:recipe_id>/", methods=["POST"])
+@ app.route("/api/recipes/<int:user_id>/unlike/<int:recipe_id>/", methods=["POST"])
 def unlike_recipe(user_id: int, recipe_id: int):
     """
-    Description: Has a specific user remove their like for specific recipe. 
-    Returns the unliked recipe. 
+    Description: Has a specific user remove their like for specific recipe.
+    Returns the unliked recipe.
     Method: POST
     Query Parameters: user_id, recipe_id
     Body: None
@@ -606,10 +687,11 @@ def unlike_recipe(user_id: int, recipe_id: int):
         "instructions": <instructions-list-without-recipe-ids>,
         "comments": <comment-list-without-recipe-ids>,
         "number_of_likes": <integer>,
-        "users_liked": <user-list-without-recipes>
+        "users_liked": <user-list-without-recipes>,
+        "created_at": <integer> <- unix time (time since epoch in 1970)
     }
     Success Response: 200
-    Error Responses: 404 if user or recipe not found, 403 if the user didn't 
+    Error Responses: 404 if user or recipe not found, 403 if the user didn't
     have this recipe liked in the first place.
     """
     user = User.query.filter_by(id=user_id).first()
@@ -620,6 +702,7 @@ def unlike_recipe(user_id: int, recipe_id: int):
         return failure_response("Recipe not found!", 404)
     for r in user.liked_recipes:
         if r.id == recipe.id:
+            recipe.number_of_likes -= 1
             user.liked_recipes.remove(r)
             db.session.commit()
             return success_response(recipe.serialize())
@@ -627,10 +710,10 @@ def unlike_recipe(user_id: int, recipe_id: int):
     return failure_response("This user has not liked this recipe!", 403)
 
 
-@app.route("/api/comments/<int:user_id>/recipe/<int:recipe_id>/", methods=["POST"])
+@ app.route("/api/comments/<int:user_id>/recipe/<int:recipe_id>/", methods=["POST"])
 def add_comment_from_user_to_recipe(user_id: int, recipe_id: int):
     """
-    Description: Has a specific user comment on a specific recipe. Returns the 
+    Description: Has a specific user comment on a specific recipe. Returns the
     newly posted comment.
     Method: POST
     Query Parameters: user_id, recipe_id
@@ -669,7 +752,7 @@ def add_comment_from_user_to_recipe(user_id: int, recipe_id: int):
 # ------------------------------ DELETE METHODS ------------------------------ #
 
 
-@app.route("/api/users/<int:user_id>/", methods=["DELETE"])
+@ app.route("/api/users/<int:user_id>/", methods=["DELETE"])
 def delete_user(user_id: int):
     """
     Description: Removes a user from the database entirely. Returns the deleted
@@ -696,7 +779,7 @@ def delete_user(user_id: int):
     return success_response(user.serialize())
 
 
-@app.route("/api/recipes/<int:recipe_id>/", methods=["DELETE"])
+@ app.route("/api/recipes/<int:recipe_id>/", methods=["DELETE"])
 def delete_recipe(recipe_id: int):
     """
     Description: Removes a recipe from the database entirely. Returns the
@@ -717,7 +800,8 @@ def delete_recipe(recipe_id: int):
         "instructions": <instructions-list-without-recipe-ids>,
         "comments": <comment-list-without-recipe-ids>,
         "number_of_likes": <integer>,
-        "users_liked": <user-list-without-recipes>
+        "users_liked": <user-list-without-recipes>,
+        "created_at": <integer> <- unix time (time since epoch in 1970)
     }
     Success Response: 200
     Error Responses: 404 if recipe not found
@@ -730,7 +814,7 @@ def delete_recipe(recipe_id: int):
     return success_response(recipe.serialize())
 
 
-@app.route("/api/comments/<int:comment_id>/", methods=["DELETE"])
+@ app.route("/api/comments/<int:comment_id>/", methods=["DELETE"])
 def delete_comment(comment_id: int):
     """
     Description: Removes a comment from the database entirely. Returns the
@@ -755,7 +839,7 @@ def delete_comment(comment_id: int):
     return success_response(comment.serialize())
 
 
-@app.route("/api/ingredients/name/<int:ingredient_name_id>/", methods=["DELETE"])
+@ app.route("/api/ingredients/name/<int:ingredient_name_id>/", methods=["DELETE"])
 def delete_ingredient_name(ingredient_name_id):
     """
     Deletes ingredient name with associated ingredient_name_id.
