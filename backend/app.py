@@ -33,9 +33,27 @@ def failure_response(message, code=404):
 
 @app.route("/")
 @app.route("/api/users/")
-def get_users():
+def get_all_users():
     """
-    Returns all users.
+    Description: Gets all users currently in database.
+    Method: GET
+    Query Parameters: None
+    Body: None
+    Return: {
+            "users": [
+                {
+                    "id": <integer>,
+                    "username": <string>,
+                    "email": <string>,
+                    "posted_recipes": <recipe-list>,
+                    "liked_recipes": <recipe-list-without-users-liked>,
+                    "posted_comments": <comment-list-without-user-ids>
+                },
+                ...
+            ]
+        }
+    Sucess Response: 200
+    Error Responses: None
     """
     return success_response(
         {"users": [u.serialize() for u in User.query.all()]}
@@ -43,9 +61,34 @@ def get_users():
 
 
 @app.route("/api/recipes/")
-def get_recipes():
+def get_all_recipes():
     """
-    Returns all recipes.
+    Description: Gets all recipes currently in database.
+    Method: GET
+    Query Parameters: None
+    Body: None
+    Return: {
+            "recipes": [
+                {
+                    "id": <integer>,
+                    "user_id": <integer>,
+                    "name": <string>,
+                    "time": <integer>,
+                    "time_unit": <string>,
+                    "difficulty": <string>,
+                    "meal_type": <string>,
+                    "cuisine": <string>,
+                    "ingredients": <ingredient-list-without-recipe-ids>,
+                    "instructions": <instructions-list-without-recipe-ids>,
+                    "comments": <comments-list-without-recipe-ids>,
+                    "number_of_likes": <integer>,
+                    "users_liked": <users-list-without-recipes>
+                },
+                ...
+            ]
+        }
+    Sucess Response: 200
+    Error Responses: None
     """
     return success_response(
         {"recipes": [r.serialize() for r in Recipe.query.all()]}
@@ -76,8 +119,32 @@ def get_ingredients():
 @app.route("/api/recipes/liked/<int:user_id>/")
 def get_liked_recipes_from_user(user_id: int):
     """
-    Gets all recipes that a user has liked.
-    Error 404 if this user does not exist.
+    Description: Gets all recipes that a user has liked.
+    Method: GET
+    Query Parameters: user_id
+    Body: None
+    Return: {
+            "recipes": [
+                {
+                    "id": <integer>,
+                    "user_id": <integer>,
+                    "name": <string>,
+                    "time": <integer>,
+                    "time_unit": <string>,
+                    "difficulty": <string>,
+                    "meal_type": <string>,
+                    "cuisine": <string>,
+                    "ingredients": <ingredient-list-without-recipe-ids>,
+                    "instructions": <instructions-list-without-recipe-ids>,
+                    "comments": <comments-list-without-recipe-ids>,
+                    "number_of_likes": <integer>,
+                    "users_liked": <users-list-without-recipes>
+                },
+                ...
+            ]
+        }
+    Success Response: 200
+    Error Responses: 404 if user does not exist
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -90,8 +157,32 @@ def get_liked_recipes_from_user(user_id: int):
 @app.route("/api/recipes/posted/<int:user_id>/")
 def get_posted_recipes_from_user(user_id: int):
     """
-    Gets all recipes that a user has posted.
-    Error 404 if this user does not exist.
+    Description: Gets all recipes that a user has posted.
+    Method: GET
+    Query Parameters: user_id
+    Body: None
+    Return: {
+            "recipes": [
+                {
+                    "id": <integer>,
+                    "user_id": <integer>,
+                    "name": <string>,
+                    "time": <integer>,
+                    "time_unit": <string>,
+                    "difficulty": <string>,
+                    "meal_type": <string>,
+                    "cuisine": <string>,
+                    "ingredients": <ingredient-list-without-recipe-ids>,
+                    "instructions": <instructions-list-without-recipe-ids>,
+                    "comments": <comments-list-without-recipe-ids>,
+                    "number_of_likes": <integer>,
+                    "users_liked": <users-list-without-recipes>
+                },
+                ...
+            ]
+        }
+    Success Response: 200
+    Error Responses: 404 if user does not exist
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -102,10 +193,26 @@ def get_posted_recipes_from_user(user_id: int):
 
 
 @app.route("/api/ingredients/<int:recipe_id>/")
-def get_ingredients_for_specific_recipe(recipe_id):
+def get_ingredients_for_specific_recipe(recipe_id: int):
     """
-    Gets all ingredients for a specific recipe.
-    Error 404 if recipe with recipe_id does not exist
+    Description: Gets all ingredients for a specific recipe.
+    Method: GET
+    Query Parameters: recipe_id
+    Body: None
+    Return: {
+            "ingredients": [
+                {
+                    "id": <integer>,
+                    "recipe_id": <integer>,
+                    "name": <string>,
+                    "amount": <integer>,
+                    "unit": <string>
+                },
+                ...
+            ]
+        }
+    Success Response: 200
+    Error Responses: 404 if recipe does not exist.
     """
     recipe = Recipe.query.filter_by(id=recipe_id).first()
     if recipe is None:
@@ -113,6 +220,35 @@ def get_ingredients_for_specific_recipe(recipe_id):
     return success_response(
         {"ingredients": [i.serialize() for i in recipe.ingredients]}
     )
+
+
+@app.route("/api/instructions/<int:recipe_id>/")
+def get_instructions_for_specific_recipe(recipe_id: int):
+    """
+    Description: Gets all instructions for a specific recipe.
+    Method: GET
+    Query Parameters: recipe_id
+    Body: None
+    Return: {
+            "instructions": [
+                {
+                    "id": <integer>,
+                    "recipe_id": <integer>,
+                    "step_number": <integer>,
+                    "step": <string>
+                },
+                ...
+            ]
+        }
+    Success Response: 200
+    Error Responses: 404 if recipe does not exist.
+    """
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
+    if recipe is None:
+        return failure_response("Recipe not found!", 404)
+    return success_response({
+        "instructions": [ins.serialize() for ins in recipe.instructions]
+    })
 
 
 @app.route("/api/recipes/<int:start>/duration/<int:end>/")
@@ -143,6 +279,49 @@ def get_comments():
     return success_response(
         {"comments": [c.serialize() for c in Comment.query.all()]}
     )
+
+
+@app.route("/api/comments/<int:recipe_id>/recipe/")
+def get_comments_under_recipe(recipe_id: int):
+    """
+    Description: Gets all comments under a specific recipe.
+    Method: GET
+    Query Parameters: recipe_id
+    Body: None
+    Return: {
+            "ingredients": [
+                {
+                    "id": <integer>,
+                    "recipe_id": <integer>,
+                    "name": <string>,
+                    "amount": <integer>,
+                    "unit": <string>
+                },
+                ...
+            ]
+        }
+    Success Response: 200
+    Error Responses: 404 if recipe does not exist.
+    """
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
+    if recipe is None:
+        return failure_response("Recipe not found!", 404)
+    return success_response({
+        "comments": [c.serialize() for c in recipe.comments]
+    })
+
+
+@app.route("/api/comments/<int:user_id>/user/")
+def get_comments_by_user(user_id: int):
+    """
+    Returns all comments posted by the user with id user_id
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response('User not found!', 404)
+    return success_response({
+        "posted_comments": [pc.serialize() for pc in user.posted_comments]
+    })
 
 
 # ------------------------------ POST METHODS -------------------------------- #
@@ -176,15 +355,28 @@ def add_ingredient_name():
 @app.route("/api/users/", methods=["POST"])
 def add_user():
     """
-    Adds a new user.\n
-    BODY:\n
-    {
+    Description: Adds a new user to the database.
+    Method: POST
+    Query Parameters: None
+    Body: {
         "username": <string>,
         "email": <string>,
         "password": <string>
-    }\n
-    Error 400 if username, email, or password not specified
-    Error 404 if user with specified username already exists
+    }
+    Return: {
+            "ingredients": [
+                {
+                    "id": <integer>,
+                    "recipe_id": <integer>,
+                    "name": <string>,
+                    "amount": <integer>,
+                    "unit": <string>
+                },
+                ...
+            ]
+        }
+    Sucess Response: 201
+    Error Responses: 400 if username, email, or password not specified.
     """
     body = json.loads(request.data)
     username = body.get("username")
@@ -208,11 +400,11 @@ def add_user():
 @app.route("/api/recipes/<int:user_id>/", methods=["POST"])
 def add_recipe_for_user(user_id: int):
     """
-    Adds a recipe to a specific user profile.\n
-    Parameters:
-        user_id: id of user to add this recipe to
-    BODY:
-        {
+    Description: Adds a recipe to a specific user profile. 
+    Returns the newly created recipe.
+    Method: POST
+    Query Parameters: user_id
+    Body: {
             "name": <string>,
             "time": <integer>,
             "time_unit": <string>,
@@ -222,15 +414,8 @@ def add_recipe_for_user(user_id: int):
             "ingredients": [
                 {
                     "name": <string>,
-                    "unit": <string>,
                     "amount": <integer>,
-                    "is_metric": <boolean>
-                },
-                {
-                    "name": <string>,
-                    "unit": <string>,
-                    "amount": <integer>,
-                    "is_metric": <boolean>
+                    "unit": <string>
                 },
                 ...
             ],
@@ -239,23 +424,26 @@ def add_recipe_for_user(user_id: int):
                     "step_number": <integer>
                     "step": <string>
                 },
-                {
-                    "step_number": <integer>
-                    "step": <string>
-                },
                 ...
             ] 
         }
-    Error 404 is user with user_id not found\n
-    Error 400 if any of the fields above are not specified\n
-        Error 400 if "name", "unit", or "amount" are not specified for a 
-        particular ingredient
-        Error 400 if any instruction is not a string or is all whitespace
-
-    If an ingredient name doesn't exist, add that ingredient name to the 
-    ingredient names table
-
-    Returns the newly added recipe
+    Return: {
+        "id": <integer>,
+        "user_id": <integer>,
+        "name": <string>,
+        "time": <integer>,
+        "time_unit": <string>,
+        "difficulty": <string>,
+        "meal_type": <string>,
+        "cuisine": <string>,
+        "ingredients": <ingredients-list-without-recipe-ids>,
+        "instructions": <instructions-list-without-recipe-ids>,
+        "comments": [],
+        "number_of_likes": 0,
+        "users_liked": []
+    }
+    Success Response: 200
+    Error Responses: 404 if user not found, 400 if any fields not specified
     """
     # Check if user is valid
     user = User.query.filter_by(id=user_id).first()
@@ -283,12 +471,12 @@ def add_recipe_for_user(user_id: int):
     cuisine = body.get("cuisine")
     if cuisine is None:
         return failure_response("Cuisine not specified!", 400)
-    instructions = body.get("instructions")
-    if instructions is None:
-        return failure_response("Instructions not specified!", 400)
     ingredients = body.get("ingredients")
     if ingredients is None:
         return failure_response("Ingredients list not specified!", 400)
+    instructions = body.get("instructions")
+    if instructions is None:
+        return failure_response("Instructions not specified!", 400)
     for i in ingredients:
         n = i.get("name")
         if n is None:
@@ -352,15 +540,34 @@ def add_recipe_for_user(user_id: int):
         db.session.add(new_step)
         new_recipe.instructions.append(new_step)
     db.session.commit()
-    return success_response(new_recipe.serialize())
+    return success_response(new_recipe.serialize(), 201)
 
 
 @app.route("/api/recipes/<int:user_id>/like/<int:recipe_id>/", methods=["POST"])
-def like_recipe(user_id, recipe_id):
+def like_recipe(user_id: int, recipe_id: int):
     """
-    Have the user with user_id like the recipe with recipe_id.
-    Returns the liked recipe.
-    Error 404 if either the user doesn't exist or recipe doesn't exist.
+    Description: Has a specific user like a specific recipe. Does nothing if the
+    user has already liked this recipe. Returns the liked recipe. 
+    Method: POST
+    Query Parameters: user_id, recipe_id
+    Body: None
+    Return: {
+        "id": <integer>,
+        "user_id": <integer>,
+        "name": <string>,
+        "time": <integer>,
+        "time_unit": <string>,
+        "difficulty": <string>,
+        "meal_type": <string>,
+        "cuisine": <string>,
+        "ingredients": <ingredients-list-without-recipe-ids>,
+        "instructions": <instructions-list-without-recipe-ids>,
+        "comments": <comment-list-without-recipe-ids>,
+        "number_of_likes": <integer>,
+        "users_liked": <user-list-without-recipes>
+    }
+    Success Response: 200
+    Error Responses: 404 if user or recipe not found
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -382,12 +589,31 @@ def like_recipe(user_id, recipe_id):
 
 
 @app.route("/api/recipes/<int:user_id>/unlike/<int:recipe_id>/", methods=["POST"])
-def unlike_recipe(user_id, recipe_id):
+def unlike_recipe(user_id: int, recipe_id: int):
     """
-    Have the user with user_id unlike the recipe with recipe_id.
-    Returns the unliked recipe.
-    Error 404 if either the user doesn't exist or recipe doesn't exist.
-    Error 403 if the user hasn't liked this recipe
+    Description: Has a specific user remove their like for specific recipe. 
+    Returns the unliked recipe. 
+    Method: POST
+    Query Parameters: user_id, recipe_id
+    Body: None
+    Return: {
+        "id": <integer>,
+        "user_id": <integer>,
+        "name": <string>,
+        "time": <integer>,
+        "time_unit": <string>,
+        "difficulty": <string>,
+        "meal_type": <string>,
+        "cuisine": <string>,
+        "ingredients": <ingredients-list-without-recipe-ids>,
+        "instructions": <instructions-list-without-recipe-ids>,
+        "comments": <comment-list-without-recipe-ids>,
+        "number_of_likes": <integer>,
+        "users_liked": <user-list-without-recipes>
+    }
+    Success Response: 200
+    Error Responses: 404 if user or recipe not found, 403 if the user didn't 
+    have this recipe liked in the first place.
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -405,7 +631,24 @@ def unlike_recipe(user_id, recipe_id):
 
 
 @app.route("/api/comments/<int:user_id>/recipe/<int:recipe_id>/", methods=["POST"])
-def add_comment_from_user_to_recipe(user_id, recipe_id):
+def add_comment_from_user_to_recipe(user_id: int, recipe_id: int):
+    """
+    Description: Has a specific user comment on a specific recipe. Returns the 
+    newly posted comment.
+    Method: POST
+    Query Parameters: user_id, recipe_id
+    Body: {
+        "text": <string>
+    }
+    Return: {
+        "id": <integer>,
+        "user_id": <integer>,
+        "recipe_id": <integer>,
+        "text": <string>
+    }
+    Success Response: 201
+    Error Responses: 404 if user or recipe not found
+    """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
         return failure_response("User not found!", 404)
@@ -421,21 +664,32 @@ def add_comment_from_user_to_recipe(user_id, recipe_id):
     new_comment = Comment(text=text, user_id=user_id, recipe_id=recipe_id)
     db.session.add(new_comment)
     recipe.comments.append(new_comment)
-    user.comments.append(new_comment)
+    user.posted_comments.append(new_comment)
     db.session.commit()
-    return success_response(new_comment.serialize())
+    return success_response(new_comment.serialize(), 201)
 
 
-# -------------------------------- DEL METHODS ------------------------------- #
+# ------------------------------ DELETE METHODS ------------------------------ #
 
 
 @app.route("/api/users/<int:user_id>/", methods=["DELETE"])
-def delete_user(user_id):
+def delete_user(user_id: int):
     """
-    Deletes user with associated user_id.
-    This removes the user entirely from the database.
-    Error 404 if this user never existed to begin with.
-    Returns the deleted user.
+    Description: Removes a user from the database entirely. Returns the deleted
+    user.
+    Method: DELETE
+    Query Parameters: user_id
+    Body: None
+    Return: {
+        "id": <integer>,
+        "username": <string>,
+        "email": <string>,
+        "posted_recipes": <recipe-list>,
+        "liked_recipes": <recipe-list-without-users-liked>,
+        "posted_comments": <comment-list-without-user-ids>
+    }
+    Success Response: 200
+    Error Responses: 404 if user not found
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -446,12 +700,30 @@ def delete_user(user_id):
 
 
 @app.route("/api/recipes/<int:recipe_id>/", methods=["DELETE"])
-def delete_recipe(recipe_id):
+def delete_recipe(recipe_id: int):
     """
-    Deletes recipe with associated recipe_id.
-    This removes the recipe entirely from the database.
-    Error 404 if this recipe never existed to begin with.
-    Returns the deleted recipe.
+    Description: Removes a recipe from the database entirely. Returns the
+    deleted recipe.
+    Method: DELETE
+    Query Parameters: recipe_id
+    Body: None
+    Return: {
+        "id": <integer>,
+        "user_id": <integer>,
+        "name": <string>,
+        "time": <integer>,
+        "time_unit": <string>,
+        "difficulty": <string>,
+        "meal_type": <string>,
+        "cuisine": <string>,
+        "ingredients": <ingredients-list-without-recipe-ids>,
+        "instructions": <instructions-list-without-recipe-ids>,
+        "comments": <comment-list-without-recipe-ids>,
+        "number_of_likes": <integer>,
+        "users_liked": <user-list-without-recipes>
+    }
+    Success Response: 200
+    Error Responses: 404 if recipe not found
     """
     recipe = Recipe.query.filter_by(id=recipe_id).first()
     if recipe is None:
@@ -462,12 +734,21 @@ def delete_recipe(recipe_id):
 
 
 @app.route("/api/comments/<int:comment_id>/", methods=["DELETE"])
-def delete_comment(comment_id):
+def delete_comment(comment_id: int):
     """
-    Deletes comment with associated comment_id.
-    This removes the comments entirely from the database.
-    Error 404 if this comment never existed to begin with.
-    Returns the deleted comment.
+    Description: Removes a comment from the database entirely. Returns the
+    deleted comment.
+    Method: DELETE
+    Query Parameters: comment_id
+    Body: None
+    Return: {
+        "id": <integer>,
+        "user_id": <integer>,
+        "recipe_id": <integer>,
+        "text": <string>
+    }
+    Success Response: 200
+    Error Responses: 404 if comment not found
     """
     comment = Comment.query.filter_by(id=comment_id).first()
     if comment is None:
