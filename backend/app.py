@@ -774,6 +774,8 @@ def delete_user(user_id: int):
     user = User.query.filter_by(id=user_id).first()
     if user is None:
         return failure_response("User not found!", 404)
+    for recipe in user.liked_recipes:
+        recipe.number_of_likes -= 1
     db.session.delete(user)
     db.session.commit()
     return success_response(user.serialize())
