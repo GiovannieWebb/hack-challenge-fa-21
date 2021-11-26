@@ -355,7 +355,8 @@ def add_ingredient_name():
 @app.route("/api/users/", methods=["POST"])
 def add_user():
     """
-    Description: Adds a new user to the database.
+    Description: Adds a new user to the database. Returns the newly created 
+    user.
     Method: POST
     Query Parameters: None
     Body: {
@@ -364,16 +365,12 @@ def add_user():
         "password": <string>
     }
     Return: {
-            "ingredients": [
-                {
-                    "id": <integer>,
-                    "recipe_id": <integer>,
-                    "name": <string>,
-                    "amount": <integer>,
-                    "unit": <string>
-                },
-                ...
-            ]
+            "id": <integer>,
+            "username": <string>,
+            "email": <string>,
+            "posted_recipes": [],
+            "liked_recipes": [],
+            "posted_comments": []
         }
     Sucess Response: 201
     Error Responses: 400 if username, email, or password not specified.
