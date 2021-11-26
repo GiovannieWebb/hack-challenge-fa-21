@@ -10,8 +10,17 @@ TODO:
 
     - For the sake of simplicity, no need to store ingredient names in a table.
       Just let users specify whichever ingredient names they want.
+
     - Also don't need the "is_metric" field for each ingredient for the sake of
       simplicity. Just let users specify the unit as a string
+
+    - Can limit the unit for time it takes dish to make to be minutes only, to 
+      make filtering much simpler
+
+    - Maybe don't need amount and unit for each ingredient?
+
+    - Meal types, cuisines, and difficulty level should be 
+      pre-defined/selectable from a dropdown menu for simplicity
 """
 
 # an association table for the many-to-may relationship between users and liked
@@ -102,8 +111,10 @@ class Recipe(db.Model):
     ingredients = db.relationship("Ingredient", cascade="delete")
     instructions = db.relationship("Instruction", cascade="delete")
     comments = db.relationship("Comment", cascade="delete")
+    number_of_likes = db.Column(db.Integer, nullable=False)
     users_liked = db.relationship(
         "User", secondary=user_liked_recipes, back_populates="liked_recipes")
+    created_at = db.Column(db.Integer, nullable=False)  # unix time
 
     def __init__(self, **kwargs):
         self.user_id = kwargs.get("user_id")
@@ -113,6 +124,8 @@ class Recipe(db.Model):
         self.difficulty = kwargs.get("difficulty")
         self.meal_type = kwargs.get("meal_type")
         self.cuisine = kwargs.get("cuisine")
+        self.created_at = kwargs.get("created_at")
+        self.number_of_likes = 0
 
     def serialize(self):
         return {
@@ -127,8 +140,9 @@ class Recipe(db.Model):
             "ingredients": [i.serialize_without_recipe_id() for i in self.ingredients],
             "instructions": sorted([ins.serialize_without_recipe_id() for ins in self.instructions], key=lambda x: x.get("step_number")),
             "comments": [c.serialize_without_recipe_id() for c in self.comments],
-            "number_of_likes": len(self.users_liked),
-            "users_liked": [ul.serialize_without_recipes() for ul in self.users_liked]
+            "number_of_likes": self.number_of_likes,
+            "users_liked": [ul.serialize_without_recipes() for ul in self.users_liked],
+            "created_at": self.created_at
         }
 
     def serialize_without_users_liked(self):
@@ -144,7 +158,8 @@ class Recipe(db.Model):
             "ingredients": [i.serialize_without_recipe_id() for i in self.ingredients],
             "instructions": sorted([ins.serialize_without_recipe_id() for ins in self.instructions], key=lambda x: x.get("step_number")),
             "comments": [c.serialize_without_recipe_id() for c in self.comments],
-            "number_of_likes": len(self.users_liked)
+            "number_of_likes": self.number_of_likes,
+            "created_at": self.created_at
         }
 
 
