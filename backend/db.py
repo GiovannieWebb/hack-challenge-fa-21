@@ -1,4 +1,10 @@
+import datetime
+import hashlib
+import os
+
+import bcrypt
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_
 
 db = SQLAlchemy()
 
@@ -23,14 +29,56 @@ TODO:
       pre-defined/selectable from a dropdown menu for simplicity
 """
 
-# an association table for the many-to-may relationship between users and liked
-# posts (one user can like many posts, and one post can be liked by many users)
-user_liked_recipes = db.Table(
-    "user_liked_recipes",
-    db.Model.metadata,
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
-    db.Column("recipe_id", db.Integer, db.ForeignKey("recipe.id"))
-)
+
+class AssociationTables:
+    """
+    Holds the association tables used in this database.
+    """
+
+    # an association table for the many-to-may relationship between users and
+    # liked posts (one user can like many posts, and one post can be liked by
+    # many users)
+    user_liked_recipes = db.Table(
+        "user_liked_recipes",
+        db.Model.metadata,
+        db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+        db.Column("recipe_id", db.Integer, db.ForeignKey("recipe.id"))
+    )
+
+
+class Authentication:
+    """
+    Holds methods that are useful for user authentication.
+    """
+    def create_user(username, email, password):
+        existing_user = User.query.filter(or_(
+            User.username == username,
+            User.email == email)
+        ).first()
+        if existing_user is not None:
+            return False, None
+        user = User(username=username, email=email, password=password)
+        db.session.add(user)
+        db.session.commit()
+        return True, user
+
+    def verify_credentials(email, password):
+        existing_user = User.query.filter(User.email == email).first()
+        if existing_user is None:
+            return False, None
+        return existing_user.verify_password(password), existing_user
+
+    def renew_session(update_token):
+        existing_user = User.query.filter(
+            User.update_token == update_token).first()
+        if existing_user is None:
+            return False, None
+        existing_user.renew_session()
+        db.session.commit()
+        return True, existing_user
+
+    def verify_session(session_token):
+        return User.query.filter(User.session_token == session_token).first()
 
 
 class User(db.Model):
@@ -42,6 +90,9 @@ class User(db.Model):
     the other being the recipes they've liked--and a list of all comments 
     they've posted on various recipes.
 
+    Passwords are encryted. Each user has a session token and update token, 
+    along with their respective expiration dates.
+
     There is a one-to-one relationship between users and usernames, users and 
     emails, and users and passwords. 
     There is a one-to-many relationship between users and their posted recipes. 
@@ -49,18 +100,51 @@ class User(db.Model):
     """
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, nullable=False)
-    email = db.Column(db.String, nullable=False)
-    password = db.Column(db.String, nullable=True)
+
+    # User information
+    username = db.Column(db.String, nullable=False, unique=True)
+    email = db.Column(db.String, nullable=False, unique=True)
+    password_digest = db.Column(db.String, nullable=False)
+
+    # Session information
+    session_token = db.Column(db.String, nullable=False, unique=True)
+    session_expiration = db.Column(db.DateTime, nullable=False)
+    update_token = db.Column(db.String, nullable=False, unique=True)
+    update_token_expiration = db.Column(db.DateTime, nullable=False)
+
     posted_recipes = db.relationship("Recipe", cascade="delete")
     liked_recipes = db.relationship(
-        "Recipe", secondary=user_liked_recipes, back_populates="users_liked")
+        "Recipe", secondary=AssociationTables.user_liked_recipes, back_populates="users_liked")
     posted_comments = db.relationship("Comment", cascade="delete")
 
     def __init__(self, **kwargs):
         self.username = kwargs.get("username")
         self.email = kwargs.get("email")
-        self.password = kwargs.get("password")
+        self.password_digest = bcrypt.hashpw(kwargs.get(
+            "password").encode("utf8"), bcrypt.gensalt(rounds=13))
+        self.renew_session()
+
+    def _urlsafe_base_64(self):
+        """ Used to randomly generate session/update tokens. """
+        return hashlib.sha1(os.urandom(64)).hexdigest()
+
+    def renew_session(self):
+        """ Generates new tokens, and resets expiration time. """
+        self.session_token = self._urlsafe_base_64()
+        self.session_expiration = datetime.datetime.now() + datetime.timedelta(days=1)
+        self.update_token = self._urlsafe_base_64()
+        self.update_token_expiration = datetime.datetime.now() + datetime.timedelta(days=32)
+
+    def verify_password(self, password):
+        return bcrypt.checkpw(password.encode("utf8"), self.password_digest)
+
+    def verify_session_token(self, session_token):
+        """ Checks if session token is valid and hasn't expired. """
+        return session_token == self.session_token and datetime.datetime.now() < self.session_expiration
+
+    def verify_update_token(self, update_token):
+        """ Checks if update token is valid and hasn't expired. """
+        return update_token == self.update_token and datetime.datetime.now() < self.update_token_expiration
 
     def serialize(self):
         return {
@@ -113,7 +197,7 @@ class Recipe(db.Model):
     comments = db.relationship("Comment", cascade="delete")
     number_of_likes = db.Column(db.Integer, nullable=False)
     users_liked = db.relationship(
-        "User", secondary=user_liked_recipes, back_populates="liked_recipes")
+        "User", secondary=AssociationTables.user_liked_recipes, back_populates="liked_recipes")
     created_at = db.Column(db.Integer, nullable=False)  # unix time
 
     def __init__(self, **kwargs):
