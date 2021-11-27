@@ -3,7 +3,7 @@ from datetime import datetime
 from time import mktime
 
 from db import db
-from db import User, Recipe, Ingredient, Instruction, Comment, IngredientName
+from db import Authentication, Comment, Ingredient, IngredientName, Instruction, Recipe, User
 from constants import Constants
 from flask import Flask
 from flask import request
@@ -29,6 +29,21 @@ def success_response(data, code=200):
 def failure_response(message, code=404):
     return json.dumps({"error": message}), code
 
+
+# end of generalized response formats
+
+
+def extract_token(request):
+    """
+    Gets token from authorization header.
+    """
+    token = request.headers.get("Authorization")
+    if token is None:
+        return False, "Missing authorization header!"
+    token = token.replace("Bearer", "").strip()
+    return True, token
+
+
 # your routes here
 
 # ------------------------------ GET METHODS --------------------------------- #
@@ -41,6 +56,7 @@ def get_all_users():
     Description: Gets all users currently in database.
     Method: GET
     Query Parameters: None
+    Headers: None
     Body: None
     Return: {
             "users": [
@@ -69,6 +85,7 @@ def get_all_recipes():
     Description: Gets all recipes currently in database.
     Method: GET
     Query Parameters: None
+    Headers: None
     Body: None
     Return: {
             "recipes": [
@@ -126,6 +143,7 @@ def get_liked_recipes_from_user(user_id: int):
     Description: Gets all recipes that a user has liked.
     Method: GET
     Query Parameters: user_id
+    Headers: None
     Body: None
     Return: {
             "recipes": [
@@ -165,6 +183,7 @@ def get_posted_recipes_from_user(user_id: int):
     Description: Gets all recipes that a user has posted.
     Method: GET
     Query Parameters: user_id
+    Headers: None
     Body: None
     Return: {
             "recipes": [
@@ -204,6 +223,7 @@ def get_ingredients_for_specific_recipe(recipe_id: int):
     Description: Gets all ingredients for a specific recipe.
     Method: GET
     Query Parameters: recipe_id
+    Headers: None
     Body: None
     Return: {
             "ingredients": [
@@ -234,6 +254,7 @@ def get_instructions_for_specific_recipe(recipe_id: int):
     Description: Gets all instructions for a specific recipe.
     Method: GET
     Query Parameters: recipe_id
+    Headers: None
     Body: None
     Return: {
             "instructions": [
@@ -293,15 +314,15 @@ def get_comments_under_recipe(recipe_id: int):
     Description: Gets all comments under a specific recipe.
     Method: GET
     Query Parameters: recipe_id
+    Headers: None
     Body: None
     Return: {
-            "ingredients": [
+            "comments": [
                 {
                     "id": <integer>,
+                    "user_id": <integer>,
                     "recipe_id": <integer>,
-                    "name": <string>,
-                    "amount": <integer>,
-                    "unit": <string>
+                    "text": <string>
                 },
                 ...
             ]
@@ -337,6 +358,7 @@ def get_recipes_by_filter():
     the filters. Returns the list of recipes that match the given filters.
     Method: GET
     Query Parameters: None
+    Headers: None
     Body: {
         "difficulties": [], <- list of difficulty levels
         "meal_types": [], <- list of meal types
@@ -429,46 +451,163 @@ def add_ingredient_name():
     return success_response(new_ingredient_name.serialize(), 201)
 
 
-@app.route("/api/users/", methods=["POST"])
-def add_user():
+@app.route("/api/users/register/", methods=["POST"])
+def register_account():
     """
-    Description: Adds a new user to the database. Returns the newly created
-    user.
+    Description: Register's a new user account and adds that new user to the 
+    database. Returns user's session token and its expiration date, and user's 
+    update token and its expiration date.
     Method: POST
     Query Parameters: None
+    Headers: None
     Body: {
         "username": <string>,
         "email": <string>,
         "password": <string>
     }
     Return: {
-            "id": <integer>,
-            "username": <string>,
-            "email": <string>,
-            "posted_recipes": [],
-            "liked_recipes": [],
-            "posted_comments": []
-        }
+        "session_token": <string>,
+        "session_expiration": <string>, <- string of datetime object
+        "update_token": <string>,
+        "update_token_expiration": <string>, <- string of datetime object
+    }
     Sucess Response: 201
     Error Responses: 400 if username, email, or password not specified.
+                     403 if user already exists.
     """
     body = json.loads(request.data)
     username = body.get("username")
     if username is None:
         return failure_response("Username not specified!", 400)
-    user = User.query.filter_by(username=username).first()
-    if user is not None:
-        return failure_response("User with this username already exists!", 404)
     email = body.get("email")
     if email is None:
         return failure_response("Email not specified!", 400)
     password = body.get("password")
     if password is None:
         return failure_response("Password not specified!", 400)
-    new_user = User(username=username, email=email, password=password)
-    db.session.add(new_user)
-    db.session.commit()
-    return success_response(new_user.serialize(), 201)
+
+    created, user = Authentication.create_user(username, email, password)
+    if not created:
+        return failure_response("User already exists!", 403)
+
+    return success_response({
+        "session_token": user.session_token,
+        "session_expiration": str(user.session_expiration),
+        "update_token": user.update_token,
+        "update_token_expiration": str(user.update_token_expiration)
+    }, 201)
+
+    # new_user = User(username=username, email=email, password=password)
+    # db.session.add(new_user)
+    # db.session.commit()
+    # return success_response(new_user.serialize(), 201)
+
+
+@app.route("/api/users/login/", methods=["POST"])
+def login():
+    """
+    Description: Logs a user in. Returns user's session token and its expiration 
+    date, and user's update token and expiration date.
+    Method: POST
+    Query Parameters: None
+    Headers: None
+    Body: {
+        "email": <string>,
+        "password": <string>
+    }
+    Return: {
+        "session_token": <string>,
+        "session_expiration": <string>, <- string of datetime object
+        "update_token": <string>,
+        "update_token_expiration": <string>, <- string of datetime object
+    }
+    Sucess Response: 200
+    Error Responses: 400 email or password not specified.
+                     404 if email or password incorrect.
+    """
+    body = json.loads(request.data)
+    email = body.get("email")
+    if email is None:
+        return failure_response("Email not specified!", 400)
+    password = body.get("password", 400)
+    if password is None:
+        return failure_response("Password not specified!", 400)
+
+    valid_creds, user = Authentication.verify_credentials(email, password)
+    if not valid_creds:
+        return failure_response("Invalid email or password!")
+
+    return success_response({
+        "session_token": user.session_token,
+        "session_expiration": str(user.session_expiration),
+        "update_token": user.update_token,
+        "update_token_expiration": str(user.update_token_expiration)
+    })
+
+
+@app.route("/api/users/session/update/", methods=["POST"])
+def update_session():
+    """
+    Description: Updates a user's session. Returns user's session token and its 
+    expiration date, and user's update token and expiration date.
+    Method: POST
+    Query Parameters: None
+    Headers: Key - "Authorization", Value - "Bearer <update-token>"
+    Body: None
+    Return: {
+        "session_token": <string>,
+        "session_expiration": <string>, <- string of datetime object
+        "update_token": <string>,
+        "update_token_expiration": <string>, <- string of datetime object
+    }
+    Sucess Response: 200
+    Error Responses: 400 if invalid update token.
+    """
+    success, update_token = extract_token(request)
+    if not success:
+        return failure_response(update_token)
+
+    valid, user = Authentication.renew_session(update_token)
+    if not valid:
+        return failure_response("Invalid update token!")
+
+    return success_response({
+        "session_token": user.session_token,
+        "session_expiration": str(user.session_expiration),
+        "update_token": user.update_token,
+        "update_token_expiration": str(user.update_token_expiration)
+    })
+
+
+@app.route("/api/users/session/validate/")
+def validate_session():
+    """
+    Description: Validates a user's session. Returns the (serialized) user of 
+    the validated session.
+    Method: GET
+    Query Parameters: None
+    Headers: Key - "Authorization", Value - "Bearer <session-token>"
+    Body: None
+    Return: {
+        "id": <integer>,
+        "username": <string>,
+        "email": <string>,
+        "posted_recipes": <recipe-list>,
+        "liked_recipes": <recipe-list-without-users-liked>,
+        "posted_comments": <comment-list-without-user-ids>
+    }
+    Sucess Response: 200
+    Error Responses: 400 if invalid session token.
+    """
+    sucess, session_token = extract_token(request)
+    if not sucess:
+        return failure_response(session_token)
+
+    valid_user = Authentication.verify_session(session_token)
+    if valid_user is None:
+        return failure_response("Invalid session token!")
+
+    return success_response(valid_user.serialize())
 
 
 @app.route("/api/recipes/<int:user_id>/", methods=["POST"])
@@ -478,6 +617,7 @@ def add_recipe_for_user(user_id: int):
     Returns the newly created recipe.
     Method: POST
     Query Parameters: user_id
+    Headers: None
     Body: {
             "name": <string>,
             "time": <integer>,
@@ -518,7 +658,8 @@ def add_recipe_for_user(user_id: int):
         "created_at": <integer> <- unix time (time since epoch in 1970)
     }
     Success Response: 200
-    Error Responses: 404 if user not found, 400 if any fields not specified
+    Error Responses: 404 if user not found.
+                     400 if any fields not specified.
     """
     # Check if user is valid
     user = User.query.filter_by(id=user_id).first()
@@ -626,6 +767,7 @@ def like_recipe(user_id: int, recipe_id: int):
     user has already liked this recipe. Returns the liked recipe.
     Method: POST
     Query Parameters: user_id, recipe_id
+    Headers: None
     Body: None
     Return: {
         "id": <integer>,
@@ -644,7 +786,7 @@ def like_recipe(user_id: int, recipe_id: int):
         "created_at": <integer> <- unix time (time since epoch in 1970)
     }
     Success Response: 200
-    Error Responses: 404 if user or recipe not found
+    Error Responses: 404 if user or recipe not found.
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -673,6 +815,7 @@ def unlike_recipe(user_id: int, recipe_id: int):
     Returns the unliked recipe.
     Method: POST
     Query Parameters: user_id, recipe_id
+    Headers: None
     Body: None
     Return: {
         "id": <integer>,
@@ -691,8 +834,9 @@ def unlike_recipe(user_id: int, recipe_id: int):
         "created_at": <integer> <- unix time (time since epoch in 1970)
     }
     Success Response: 200
-    Error Responses: 404 if user or recipe not found, 403 if the user didn't
-    have this recipe liked in the first place.
+    Error Responses: 404 if user or recipe not found.
+                     403 if the user didn't have this recipe liked in the first 
+                     place.
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -717,6 +861,7 @@ def add_comment_from_user_to_recipe(user_id: int, recipe_id: int):
     newly posted comment.
     Method: POST
     Query Parameters: user_id, recipe_id
+    Headers: None
     Body: {
         "text": <string>
     }
@@ -727,7 +872,7 @@ def add_comment_from_user_to_recipe(user_id: int, recipe_id: int):
         "text": <string>
     }
     Success Response: 201
-    Error Responses: 404 if user or recipe not found
+    Error Responses: 404 if user or recipe not found.
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -759,6 +904,7 @@ def delete_user(user_id: int):
     user.
     Method: DELETE
     Query Parameters: user_id
+    Headers: None
     Body: None
     Return: {
         "id": <integer>,
@@ -769,7 +915,7 @@ def delete_user(user_id: int):
         "posted_comments": <comment-list-without-user-ids>
     }
     Success Response: 200
-    Error Responses: 404 if user not found
+    Error Responses: 404 if user not found.
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -788,6 +934,7 @@ def delete_recipe(recipe_id: int):
     deleted recipe.
     Method: DELETE
     Query Parameters: recipe_id
+    Headers: None
     Body: None
     Return: {
         "id": <integer>,
@@ -806,7 +953,7 @@ def delete_recipe(recipe_id: int):
         "created_at": <integer> <- unix time (time since epoch in 1970)
     }
     Success Response: 200
-    Error Responses: 404 if recipe not found
+    Error Responses: 404 if recipe not found.
     """
     recipe = Recipe.query.filter_by(id=recipe_id).first()
     if recipe is None:
@@ -823,6 +970,7 @@ def delete_comment(comment_id: int):
     deleted comment.
     Method: DELETE
     Query Parameters: comment_id
+    Headers: None
     Body: None
     Return: {
         "id": <integer>,
@@ -831,7 +979,7 @@ def delete_comment(comment_id: int):
         "text": <string>
     }
     Success Response: 200
-    Error Responses: 404 if comment not found
+    Error Responses: 404 if comment not found.
     """
     comment = Comment.query.filter_by(id=comment_id).first()
     if comment is None:
