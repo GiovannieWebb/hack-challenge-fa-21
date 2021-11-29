@@ -104,6 +104,7 @@ def get_all_recipes():
                     "comments": <comments-list-without-recipe-ids>,
                     "number_of_likes": <integer>,
                     "users_liked": <users-list-without-recipes>,
+                    "users_commented": <users-list-without-recipes>,
                     "created_at": <integer> <- unix time (time since epoch in 1970)
                 },
                 ...
@@ -147,7 +148,7 @@ def get_liked_recipes_from_user(user_id: int):
     Headers: None
     Body: None
     Return: {
-            "recipes": [
+            "liked_recipes": [
                 {
                     "id": <integer>,
                     "user_id": <integer>,
@@ -162,6 +163,7 @@ def get_liked_recipes_from_user(user_id: int):
                     "comments": <comments-list-without-recipe-ids>,
                     "number_of_likes": <integer>,
                     "users_liked": <users-list-without-recipes>,
+                    "users_commented": <users-list-without-recipes>,
                     "created_at": <integer> <- unix time (time since epoch in 1970)
                 },
                 ...
@@ -187,7 +189,7 @@ def get_posted_recipes_from_user(user_id: int):
     Headers: None
     Body: None
     Return: {
-            "recipes": [
+            "posted_recipes": [
                 {
                     "id": <integer>,
                     "user_id": <integer>,
@@ -202,6 +204,7 @@ def get_posted_recipes_from_user(user_id: int):
                     "comments": <comments-list-without-recipe-ids>,
                     "number_of_likes": <integer>,
                     "users_liked": <users-list-without-recipes>,
+                    "users_commented": <users-list-without-recipes>,
                     "created_at": <integer> <- unix time (time since epoch in 1970)
                 },
                 ...
@@ -215,6 +218,47 @@ def get_posted_recipes_from_user(user_id: int):
         return failure_response("User not found!", 404)
     return success_response({
         "posted_recipes": [pr.serialize() for pr in user.posted_recipes]
+    })
+
+
+@app.route("/api/recipes/commented/<int:user_id>/")
+def get_commented_on_recipes_from_user(user_id: int):
+    """
+    Description: Gets all recipes that a user has commented on.
+    Method: GET
+    Query Parameters: user_id
+    Headers: None
+    Body: None
+    Return: {
+            "commented_on_recipes": [
+                {
+                    "id": <integer>,
+                    "user_id": <integer>,
+                    "name": <string>,
+                    "time": <integer>,
+                    "time_unit": <string>,
+                    "difficulty": <string>,
+                    "meal_type": <string>,
+                    "cuisine": <string>,
+                    "ingredients": <ingredient-list-without-recipe-ids>,
+                    "instructions": <instructions-list-without-recipe-ids>,
+                    "comments": <comments-list-without-recipe-ids>,
+                    "number_of_likes": <integer>,
+                    "users_liked": <users-list-without-recipes>,
+                    "users_commented": <users-list-without-recipes>,
+                    "created_at": <integer> <- unix time (time since epoch in 1970)
+                },
+                ...
+            ]
+        }
+    Success Response: 200
+    Error Responses: 404 if user does not exist
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response("User not found!", 404)
+    return success_response({
+        "commented_on_recipes": [cor.serialize() for cor in user.commented_on_recipes]
     })
 
 
@@ -388,11 +432,12 @@ def get_recipes_by_filter():
                 "difficulty": <string>,
                 "meal_type": <string>,
                 "cuisine": <string>,
-                "ingredients": <ingredients-list-without-recipe-ids>,
+                "ingredients": <ingredient-list-without-recipe-ids>,
                 "instructions": <instructions-list-without-recipe-ids>,
-                "comments": <list-of-comments-without-recipe-ids>,
+                "comments": <comments-list-without-recipe-ids>,
                 "number_of_likes": <integer>,
-                "users_liked": [],
+                "users_liked": <users-list-without-recipes>,
+                "users_commented": <users-list-without-recipes>,
                 "created_at": <integer> <- unix time (time since epoch in 1970)
             },
             ...
@@ -470,7 +515,7 @@ def register_account():
         "session_token": <string>,
         "session_expiration": <string>, <- string of datetime object
         "update_token": <string>,
-        "update_token_expiration": <string>, <- string of datetime object
+        "update_expiration": <string>, <- string of datetime object
     }
     Sucess Response: 201
     Error Responses: 400 if username, email, or password not specified.
@@ -495,7 +540,7 @@ def register_account():
         "session_token": user.session_token,
         "session_expiration": str(user.session_expiration),
         "update_token": user.update_token,
-        "update_token_expiration": str(user.update_token_expiration)
+        "update_expiration": str(user.update_expiration)
     }, 201)
 
     # new_user = User(username=username, email=email, password=password)
@@ -520,7 +565,7 @@ def login():
         "session_token": <string>,
         "session_expiration": <string>, <- string of datetime object
         "update_token": <string>,
-        "update_token_expiration": <string>, <- string of datetime object
+        "update_expiration": <string>, <- string of datetime object
     }
     Sucess Response: 200
     Error Responses: 400 email or password not specified.
@@ -542,7 +587,7 @@ def login():
         "session_token": user.session_token,
         "session_expiration": str(user.session_expiration),
         "update_token": user.update_token,
-        "update_token_expiration": str(user.update_token_expiration)
+        "update_expiration": str(user.update_expiration)
     })
 
 
@@ -559,7 +604,7 @@ def update_session():
         "session_token": <string>,
         "session_expiration": <string>, <- string of datetime object
         "update_token": <string>,
-        "update_token_expiration": <string>, <- string of datetime object
+        "update_expiration": <string>, <- string of datetime object
     }
     Sucess Response: 200
     Error Responses: 400 if invalid update token.
@@ -576,12 +621,12 @@ def update_session():
         "session_token": user.session_token,
         "session_expiration": str(user.session_expiration),
         "update_token": user.update_token,
-        "update_token_expiration": str(user.update_token_expiration)
+        "update_expiration": str(user.update_expiration)
     })
 
 
 @app.route("/api/users/session/validate/")
-def validate_session():
+def get_user_from_validated_session():
     """
     Description: Validates a user's session. Returns the (serialized) user of 
     the validated session.
@@ -761,7 +806,37 @@ def add_recipe_for_user(user_id: int):
     return success_response(new_recipe.serialize(), 201)
 
 
-@ app.route("/api/recipes/<int:user_id>/like/<int:recipe_id>/", methods=["POST"])
+@app.route("/api/recipes/<int:recipe_id>/update/", methods=["POST"])
+def modify_recipe(recipe_id):
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
+    if recipe is None:
+        return failure_response("Recipe not found!", 404)
+
+    body = json.loads(request.data)
+
+    name = body.get("name", recipe.name)
+    time = body.get("time", recipe.time)
+    time_unit = body.get("time_unit", recipe.time_unit)
+    difficulty = body.get("difficulty", recipe.difficulty)
+    meal_type = body.get("meal_type", recipe.meal_type)
+    cuisine = body.get("cuisine", recipe.cuisine)
+    ingredients = body.get("ingredients", recipe.ingredients)
+    instructions = body.get("instructions", recipe.instructions)
+
+    recipe.name = name
+    recipe.time = time
+    recipe.time_unit = time_unit
+    recipe.difficulty = difficulty
+    recipe.meal_type = meal_type
+    recipe.cuisine = cuisine
+    recipe.ingredients = ingredients
+    recipe.instructions = instructions
+
+    db.session.commit()
+    return success_response(recipe.serialize())
+
+
+@app.route("/api/recipes/<int:user_id>/like/<int:recipe_id>/", methods=["POST"])
 def like_recipe(user_id: int, recipe_id: int):
     """
     Description: Has a specific user like a specific recipe. Does nothing if the
@@ -809,7 +884,7 @@ def like_recipe(user_id: int, recipe_id: int):
     return success_response(recipe.serialize())
 
 
-@ app.route("/api/recipes/<int:user_id>/unlike/<int:recipe_id>/", methods=["POST"])
+@app.route("/api/recipes/<int:user_id>/unlike/<int:recipe_id>/", methods=["POST"])
 def unlike_recipe(user_id: int, recipe_id: int):
     """
     Description: Has a specific user remove their like for specific recipe.
@@ -855,7 +930,7 @@ def unlike_recipe(user_id: int, recipe_id: int):
     return failure_response("This user has not liked this recipe!", 403)
 
 
-@ app.route("/api/comments/<int:user_id>/recipe/<int:recipe_id>/", methods=["POST"])
+@app.route("/api/comments/<int:user_id>/recipe/<int:recipe_id>/", methods=["POST"])
 def add_comment_from_user_to_recipe(user_id: int, recipe_id: int):
     """
     Description: Has a specific user comment on a specific recipe. Returns the
@@ -891,6 +966,20 @@ def add_comment_from_user_to_recipe(user_id: int, recipe_id: int):
     db.session.add(new_comment)
     recipe.comments.append(new_comment)
     user.posted_comments.append(new_comment)
+
+    recipe_in_cor = False
+    for r in user.commented_on_recipes:
+        if r.id == recipe.id:
+            recipe_in_cor = True
+    if not recipe_in_cor:
+        user.commented_on_recipes.append(recipe)
+    user_in_uc = False
+    for u in recipe.users_commented:
+        if u.id == user.id:
+            user_in_uc = True
+    if not user_in_uc:
+        recipe.users_commented.append(user)
+
     db.session.commit()
     return success_response(new_comment.serialize(), 201)
 
@@ -985,6 +1074,18 @@ def delete_comment(comment_id: int):
     comment = Comment.query.filter_by(id=comment_id).first()
     if comment is None:
         return failure_response("Comment not found!", 404)
+
+    # user has no longer commented on this recipe if this deleted comment was
+    # the last comment that this user had posted on its associated recipe
+    user = User.query.filter_by(id=comment.user_id).first()
+    recipe = Recipe.query.filter_by(id=comment.recipe_id).first()
+    found = False
+    for c in recipe.comments:
+        if c.id != comment_id and c.user_id == user.id:
+            found = True
+    if not found:
+        user.commented_on_recipes.remove(recipe)
+
     db.session.delete(comment)
     db.session.commit()
     return success_response(comment.serialize())
