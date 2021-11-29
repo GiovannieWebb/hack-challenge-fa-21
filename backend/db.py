@@ -45,6 +45,16 @@ class AssociationTables:
         db.Column("recipe_id", db.Integer, db.ForeignKey("recipe.id"))
     )
 
+    # an association table for the many-to-may relationship between users and
+    # posted commented on (one user can comment on many posts, and one post can
+    # be commented on by many users)
+    user_commented_on_recipes = db.Table(
+        "user_commented_on_recipes",
+        db.Model.metadata,
+        db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+        db.Column("recipe_id", db.Integer, db.ForeignKey("recipe.id"))
+    )
+
 
 class Authentication:
     """
@@ -110,12 +120,15 @@ class User(db.Model):
     session_token = db.Column(db.String, nullable=False, unique=True)
     session_expiration = db.Column(db.DateTime, nullable=False)
     update_token = db.Column(db.String, nullable=False, unique=True)
-    update_token_expiration = db.Column(db.DateTime, nullable=False)
+    update_expiration = db.Column(db.DateTime, nullable=False)
 
     posted_recipes = db.relationship("Recipe", cascade="delete")
+    posted_comments = db.relationship("Comment", cascade="delete")
+
     liked_recipes = db.relationship(
         "Recipe", secondary=AssociationTables.user_liked_recipes, back_populates="users_liked")
-    posted_comments = db.relationship("Comment", cascade="delete")
+    commented_on_recipes = db.relationship(
+        "Recipe", secondary=AssociationTables.user_commented_on_recipes, back_populates="users_commented")
 
     def __init__(self, **kwargs):
         self.username = kwargs.get("username")
@@ -129,13 +142,14 @@ class User(db.Model):
         return hashlib.sha1(os.urandom(64)).hexdigest()
 
     def renew_session(self):
-        """ Generates new tokens, and resets expiration time. """
+        """ Generates new tokens and resets expiration time. """
         self.session_token = self._urlsafe_base_64()
         self.session_expiration = datetime.datetime.now() + datetime.timedelta(days=1)
         self.update_token = self._urlsafe_base_64()
-        self.update_token_expiration = datetime.datetime.now() + datetime.timedelta(days=32)
+        self.update_expiration = datetime.datetime.now() + datetime.timedelta(days=32)
 
     def verify_password(self, password):
+        """ Checks if given password matches password for this user. """
         return bcrypt.checkpw(password.encode("utf8"), self.password_digest)
 
     def verify_session_token(self, session_token):
@@ -144,16 +158,17 @@ class User(db.Model):
 
     def verify_update_token(self, update_token):
         """ Checks if update token is valid and hasn't expired. """
-        return update_token == self.update_token and datetime.datetime.now() < self.update_token_expiration
+        return update_token == self.update_token and datetime.datetime.now() < self.update_expiration
 
     def serialize(self):
         return {
             "id": self.id,
             "username": self.username,
             "email": self.email,
-            "posted_recipes": [pr.serialize() for pr in self.posted_recipes],
-            "liked_recipes": [lr.serialize_without_users_liked() for lr in self.liked_recipes],
-            "posted_comments": [pc.serialize_without_user_id() for pc in self.posted_comments]
+            "posted_recipes": [pr.serialize_without_user_id() for pr in self.posted_recipes],
+            "liked_recipes": [lr.serialize_without_users_liked_or_commented() for lr in self.liked_recipes],
+            "posted_comments": [pc.serialize_without_user_id() for pc in self.posted_comments],
+            "commented_on_recipes": [cor.serialize_without_users_liked_or_commented() for cor in self.commented_on_recipes]
         }
 
     def serialize_without_recipes(self):
@@ -198,6 +213,8 @@ class Recipe(db.Model):
     number_of_likes = db.Column(db.Integer, nullable=False)
     users_liked = db.relationship(
         "User", secondary=AssociationTables.user_liked_recipes, back_populates="liked_recipes")
+    users_commented = db.relationship(
+        "User", secondary=AssociationTables.user_commented_on_recipes, back_populates="commented_on_recipes")
     created_at = db.Column(db.Integer, nullable=False)  # unix time
 
     def __init__(self, **kwargs):
@@ -226,10 +243,29 @@ class Recipe(db.Model):
             "comments": [c.serialize_without_recipe_id() for c in self.comments],
             "number_of_likes": self.number_of_likes,
             "users_liked": [ul.serialize_without_recipes() for ul in self.users_liked],
+            "users_commented": [uc.serialize_without_recipes() for uc in self.users_commented],
             "created_at": self.created_at
         }
 
-    def serialize_without_users_liked(self):
+    def serialize_without_user_id(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "time": self.time,
+            "time_unit": self.time_unit,
+            "difficulty": self.difficulty,
+            "meal_type": self.meal_type,
+            "cuisine": self.cuisine,
+            "ingredients": [i.serialize_without_recipe_id() for i in self.ingredients],
+            "instructions": sorted([ins.serialize_without_recipe_id() for ins in self.instructions], key=lambda x: x.get("step_number")),
+            "comments": [c.serialize_without_recipe_id() for c in self.comments],
+            "number_of_likes": self.number_of_likes,
+            "users_liked": [ul.serialize_without_recipes() for ul in self.users_liked],
+            "users_commented": [uc.serialize_without_recipes() for uc in self.users_commented],
+            "created_at": self.created_at
+        }
+
+    def serialize_without_users_liked_or_commented(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
