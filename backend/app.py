@@ -21,6 +21,7 @@ with app.app_context():
 
 # generalized response formats
 
+# random comment 
 
 def success_response(data, code=200):
     return json.dumps(data), code
