@@ -13,11 +13,13 @@ The purpose of the CornellCookbook app is to connect the Cornell community throu
 
 ## A list of the app addresses each of the requirements:
   **Backend:** - 4+ routes (1 GET, 1 POST): 14 GET routes, 10 POST routes, 4 DELETE routes
+  
            - 2+ tables with relation:
               1. User -- many-to-many with liked recipes, one-to-many with posted recipes (Recipe table relation)
               2. Recipe -- many-to-many with users who liked and one-to-many with user who posted, ingredients, and instructions (User, Ingredient, and Instruction table relations)
               3. Incredient -- one-to-many with recipes (Recipe table relation)
               4. Instruction -- one-to-many with recipes (Recipe table relation)
            - API Specification: found in repo
+           
   **IOS:**
   **Design:**
