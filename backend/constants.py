@@ -16,7 +16,8 @@ class Constants:
         "japanese",
         "chinese",
         "korean",
-        "indian"
+        "indian",
+        "other"
     ]
 
     valid_difficulty_levels = [

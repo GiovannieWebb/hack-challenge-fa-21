@@ -10,23 +10,11 @@ db = SQLAlchemy()
 
 """
 TODO:
-    - Password authentication
-    - Images ???
+    - Images
         - Demo on how to store images using Amazon S3
-
-    - For the sake of simplicity, no need to store ingredient names in a table.
-      Just let users specify whichever ingredient names they want.
-
-    - Also don't need the "is_metric" field for each ingredient for the sake of
-      simplicity. Just let users specify the unit as a string
-
-    - Can limit the unit for time it takes dish to make to be minutes only, to 
-      make filtering much simpler
-
-    - Maybe don't need amount and unit for each ingredient?
-
-    - Meal types, cuisines, and difficulty level should be 
-      pre-defined/selectable from a dropdown menu for simplicity
+        - Watch backend lecture on images
+    - Containerize
+    - Deploy
 """
 
 
@@ -93,19 +81,19 @@ class Authentication:
 
 class User(db.Model):
     """
-    Represents the table of users. 
+    Represents the table of users.
 
-    Each user has a username, email, password, 
+    Each user has a username, email, password,
     two lists of recipes--one list being the recipes they've posted, and
-    the other being the recipes they've liked--and a list of all comments 
+    the other being the recipes they've liked--and a list of all comments
     they've posted on various recipes.
 
-    Passwords are encryted. Each user has a session token and update token, 
+    Passwords are encryted. Each user has a session token and update token,
     along with their respective expiration dates.
 
-    There is a one-to-one relationship between users and usernames, users and 
-    emails, and users and passwords. 
-    There is a one-to-many relationship between users and their posted recipes. 
+    There is a one-to-one relationship between users and usernames, users and
+    emails, and users and passwords.
+    There is a one-to-many relationship between users and their posted recipes.
     There is a many-to-many relationship between users and liked recipes.
     """
     __tablename__ = 'user'
@@ -182,20 +170,20 @@ class User(db.Model):
 
 class Recipe(db.Model):
     """
-    Represents the table of recipes. 
+    Represents the table of recipes.
 
-    Each recipe has a name, a time value for how long the dish should take to 
-    make (and the unit for that time value), an associated difficulty (beginner, 
-    intermediate, expert, etc.), meal type (breakfast, lunch, dinner, snack, 
-    etc.) and cuisine (Asian, Latin, American, etc.). Each also has the id of 
-    the user who posted this recipe, a list of users who have liked this recipe, 
-    and lists of comments for comments under this recipe, as well as lists for 
+    Each recipe has a name, a time value for how long the dish should take to
+    make (and the unit for that time value), an associated difficulty (beginner,
+    intermediate, expert, etc.), meal type (breakfast, lunch, dinner, snack,
+    etc.) and cuisine (Asian, Latin, American, etc.). Each also has the id of
+    the user who posted this recipe, a list of users who have liked this recipe,
+    and lists of comments for comments under this recipe, as well as lists for
     the ingredients and instructions.
 
-    There is a one-to-one relationship between recipes and their names, 
-    time/time unit, difficulty, meal time, and cuisine. 
-    There is a one-to-many relationship between users and 'posted' recipes, 
-    comments, ingredients, and instructions, and there is a many-to-many 
+    There is a one-to-one relationship between recipes and their names,
+    time/time unit, difficulty, meal time, and cuisine.
+    There is a one-to-many relationship between users and 'posted' recipes,
+    comments, ingredients, and instructions, and there is a many-to-many
     relationship between users and liked recipes.
     """
     __tablename__ = 'recipe'
@@ -203,7 +191,6 @@ class Recipe(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     name = db.Column(db.String, nullable=False)
     time = db.Column(db.Integer, nullable=False)
-    time_unit = db.Column(db.Integer, nullable=True)
     difficulty = db.Column(db.String, nullable=False)
     meal_type = db.Column(db.String, nullable=False)
     cuisine = db.Column(db.String, nullable=False)
@@ -221,7 +208,6 @@ class Recipe(db.Model):
         self.user_id = kwargs.get("user_id")
         self.name = kwargs.get("name")
         self.time = kwargs.get("time")
-        self.time_unit = kwargs.get("time_unit")
         self.difficulty = kwargs.get("difficulty")
         self.meal_type = kwargs.get("meal_type")
         self.cuisine = kwargs.get("cuisine")
@@ -234,7 +220,6 @@ class Recipe(db.Model):
             "user_id": self.user_id,
             "name": self.name,
             "time": self.time,
-            "time_unit": self.time_unit,
             "difficulty": self.difficulty,
             "meal_type": self.meal_type,
             "cuisine": self.cuisine,
@@ -252,7 +237,6 @@ class Recipe(db.Model):
             "id": self.id,
             "name": self.name,
             "time": self.time,
-            "time_unit": self.time_unit,
             "difficulty": self.difficulty,
             "meal_type": self.meal_type,
             "cuisine": self.cuisine,
@@ -271,7 +255,6 @@ class Recipe(db.Model):
             "user_id": self.user_id,
             "name": self.name,
             "time": self.time,
-            "time_unit": self.time_unit,
             "difficulty": self.difficulty,
             "meal_type": self.meal_type,
             "cuisine": self.cuisine,
@@ -289,45 +272,36 @@ class Ingredient(db.Model):
     unit. It also holds the id of the recipe it's associated with.
 
     There is a one-to-one relationship between an ingredient and its name,
-    amount, and unit. There is a one-to-many relationship between a recipe and 
-    its ingredients. 
+    amount, and unit. There is a one-to-many relationship between a recipe and
+    its ingredients.
     """
     __tablename__ = 'ingredient'
     id = db.Column(db.Integer, primary_key=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
-    ingredient_name_id = db.Column(
-        db.Integer, db.ForeignKey("ingredient_name.id"))
     name = db.Column(db.String, nullable=False)
     amount = db.Column(db.Integer, nullable=False)
-    is_metric = db.Column(db.Boolean, nullable=False)
     unit = db.Column(db.String, nullable=False)
 
     def __init__(self, **kwargs):
         self.recipe_id = kwargs.get("recipe_id")
-        self.ingredient_name_id = kwargs.get("ingredient_name_id")
         self.name = kwargs.get("name")
         self.amount = kwargs.get("amount")
-        self.is_metric = kwargs.get("is_metric")
         self.unit = kwargs.get("unit")
 
     def serialize(self):
         return {
             "id": self.id,
             "recipe_id": self.recipe_id,
-            "ingredient_name_id": self.ingredient_name_id,
             "name": self.name,
             "amount": self.amount,
-            "is_metric": self.is_metric,
             "unit": self.unit
         }
 
     def serialize_without_recipe_id(self):
         return {
             "id": self.id,
-            "ingredient_name_id": self.ingredient_name_id,
             "name": self.name,
             "amount": self.amount,
-            "is_metric": self.is_metric,
             "unit": self.unit
         }
 
@@ -413,20 +387,4 @@ class Comment(db.Model):
             "id": self.id,
             "recipe_id": self.recipe_id,
             "text": self.text
-        }
-
-
-class IngredientName(db.Model):
-    __tablename__ = 'ingredient_name'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    # associated_metrics = db.relationship("Ingredient", cascade="delete")
-
-    def __init__(self, **kwargs):
-        self.name = kwargs.get("name")
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "name": self.name
         }
