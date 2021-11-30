@@ -136,6 +136,11 @@ class User(db.Model):
         self.update_token = self._urlsafe_base_64()
         self.update_expiration = datetime.datetime.now() + datetime.timedelta(days=32)
 
+    def digest_new_password(self, password):
+        digested_pw = bcrypt.hashpw(password.encode(
+            "utf8"), bcrypt.gensalt(rounds=13))
+        self.password_digest = digested_pw
+
     def verify_password(self, password):
         """ Checks if given password matches password for this user. """
         return bcrypt.checkpw(password.encode("utf8"), self.password_digest)
