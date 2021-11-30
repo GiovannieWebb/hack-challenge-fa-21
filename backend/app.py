@@ -3,7 +3,7 @@ from datetime import datetime
 from time import mktime
 
 from db import db
-from db import Authentication, Comment, Ingredient, IngredientName, Instruction, Recipe, User
+from db import Authentication, Comment, Ingredient, Instruction, Recipe, User
 from constants import Constants
 from flask import Flask
 from flask import request
@@ -21,7 +21,6 @@ with app.app_context():
 
 # generalized response formats
 
-# random comment 
 
 def success_response(data, code=200):
     return json.dumps(data), code
@@ -95,7 +94,6 @@ def get_all_recipes():
                     "user_id": <integer>,
                     "name": <string>,
                     "time": <integer>,
-                    "time_unit": <string>,
                     "difficulty": <string>,
                     "meal_type": <string>,
                     "cuisine": <string>,
@@ -115,17 +113,6 @@ def get_all_recipes():
     """
     return success_response(
         {"recipes": [r.serialize() for r in Recipe.query.all()]}
-    )
-
-
-@app.route("/api/ingredients/name/")
-def get_ingredient_names():
-    """
-    Gets all ingredient names.
-    """
-    return success_response(
-        {"ingredient_names": [i_n.serialize()
-                              for i_n in IngredientName.query.all()]}
     )
 
 
@@ -154,7 +141,6 @@ def get_liked_recipes_from_user(user_id: int):
                     "user_id": <integer>,
                     "name": <string>,
                     "time": <integer>,
-                    "time_unit": <string>,
                     "difficulty": <string>,
                     "meal_type": <string>,
                     "cuisine": <string>,
@@ -195,7 +181,6 @@ def get_posted_recipes_from_user(user_id: int):
                     "user_id": <integer>,
                     "name": <string>,
                     "time": <integer>,
-                    "time_unit": <string>,
                     "difficulty": <string>,
                     "meal_type": <string>,
                     "cuisine": <string>,
@@ -236,7 +221,6 @@ def get_commented_on_recipes_from_user(user_id: int):
                     "user_id": <integer>,
                     "name": <string>,
                     "time": <integer>,
-                    "time_unit": <string>,
                     "difficulty": <string>,
                     "meal_type": <string>,
                     "cuisine": <string>,
@@ -321,26 +305,6 @@ def get_instructions_for_specific_recipe(recipe_id: int):
     return success_response({
         "instructions": [ins.serialize() for ins in recipe.instructions]
     })
-
-
-@app.route("/api/recipes/<int:start>/duration/<int:end>/")
-def get_recipes_with_duration(start, end):
-    """
-    Returns all dishes (recipes) that take between start and end to make.
-    BODY:
-    {
-        time_unit: <string>
-    }
-    Error 400 if time_unit not specified
-    """
-    body = json.loads(request.data)
-    time_unit = body.get("time_unit")
-    if time_unit is None:
-        return failure_response("Time unit not specified!")
-    recipes = db.session.query(Recipe).filter(Recipe.time_unit == time_unit,
-                                              Recipe.time >= start,
-                                              Recipe.time <= end)
-    return success_response({"recipes": [r.serialize() for r in recipes.all()]})
 
 
 @app.route("/api/comments/")
@@ -428,7 +392,6 @@ def get_recipes_by_filter():
                 "user_id": <integer>,
                 "name": <string>,
                 "time": <integer>,
-                "time_unit": <string>,
                 "difficulty": <string>,
                 "meal_type": <string>,
                 "cuisine": <string>,
@@ -470,31 +433,6 @@ def get_recipes_by_filter():
 
 
 # ------------------------------ POST METHODS -------------------------------- #
-
-
-@app.route("/api/ingredients/name/", methods=["POST"])
-def add_ingredient_name():
-    """
-    Adds an ingredient.\n
-    BODY:\n
-    {
-        "name": <string>
-    }\n
-    Error 400 if name is not specified
-    Error 404 if ingredient with this name already exists
-    """
-    body = json.loads(request.data)
-    name = body.get("name")
-    if name is None:
-        return failure_response("Ingredient name not found!", 400)
-    name = name.lower()
-    ingredient_name = IngredientName.query.filter_by(name=name).first()
-    if ingredient_name is not None:
-        return failure_response("Ingredient with this name already exists!", 404)
-    new_ingredient_name = IngredientName(name=name)
-    db.session.add(new_ingredient_name)
-    db.session.commit()
-    return success_response(new_ingredient_name.serialize(), 201)
 
 
 @app.route("/api/users/register/", methods=["POST"])
@@ -667,7 +605,6 @@ def add_recipe_for_user(user_id: int):
     Body: {
             "name": <string>,
             "time": <integer>,
-            "time_unit": <string>,
             "difficulty: <string>,
             "meal_type": <string>,
             "cuisine": <string>,
@@ -692,7 +629,6 @@ def add_recipe_for_user(user_id: int):
         "user_id": <integer>,
         "name": <string>,
         "time": <integer>,
-        "time_unit": <string>,
         "difficulty": <string>,
         "meal_type": <string>,
         "cuisine": <string>,
@@ -721,9 +657,6 @@ def add_recipe_for_user(user_id: int):
     time = body.get("time")
     if time is None:
         return failure_response("Time not specified!", 400)
-    time_unit = body.get("time_unit")
-    if time_unit is None:
-        return failure_response("Time unit not specified!", 400)
     difficulty = body.get("difficulty")
     if difficulty is None:
         return failure_response("Difficulty not specified!", 400)
@@ -749,9 +682,6 @@ def add_recipe_for_user(user_id: int):
         a = i.get("amount")
         if a is None:
             return failure_response("Amount not specified for a given ingredient!", 400)
-        im = i.get("is_metric")
-        if im is None:
-            return failure_response("Metric vs Imperial not specified for a given ingredient!", 400)
     for ins in instructions:
         sn = ins.get("step_number")
         if sn is None:
@@ -766,7 +696,6 @@ def add_recipe_for_user(user_id: int):
     new_recipe = Recipe(name=name,
                         user_id=user_id,
                         time=time,
-                        time_unit=time_unit,
                         difficulty=difficulty,
                         meal_type=meal_type,
                         cuisine=cuisine,
@@ -778,21 +707,11 @@ def add_recipe_for_user(user_id: int):
     recipe_id = new_recipe.id
     # add ingredients
     for ingredient in ingredients:
-        db_ingredient_name = IngredientName.query.filter_by(
-            name=ingredient.get("name")).first()
-        if db_ingredient_name is None:
-            db_ingredient_name = IngredientName(name=ingredient.get("name"))
-            db.session.add(db_ingredient_name)
-            db.session.flush()
-            db.session.refresh(db_ingredient_name)
         new_ingredient = Ingredient(recipe_id=recipe_id,
-                                    ingredient_name_id=db_ingredient_name.id,
-                                    name=db_ingredient_name.name,
+                                    name=name,
                                     amount=ingredient.get("amount"),
-                                    is_metric=ingredient.get("is_metric"),
                                     unit=ingredient.get("unit"))
         db.session.add(new_ingredient)
-        # db_ingredient_name.associated_metrics.append(new_ingredient)
         new_recipe.ingredients.append(new_ingredient)
 
     # add instructions
@@ -816,7 +735,6 @@ def modify_recipe(recipe_id):
 
     name = body.get("name", recipe.name)
     time = body.get("time", recipe.time)
-    time_unit = body.get("time_unit", recipe.time_unit)
     difficulty = body.get("difficulty", recipe.difficulty)
     meal_type = body.get("meal_type", recipe.meal_type)
     cuisine = body.get("cuisine", recipe.cuisine)
@@ -825,7 +743,6 @@ def modify_recipe(recipe_id):
 
     recipe.name = name
     recipe.time = time
-    recipe.time_unit = time_unit
     recipe.difficulty = difficulty
     recipe.meal_type = meal_type
     recipe.cuisine = cuisine
@@ -850,7 +767,6 @@ def like_recipe(user_id: int, recipe_id: int):
         "user_id": <integer>,
         "name": <string>,
         "time": <integer>,
-        "time_unit": <string>,
         "difficulty": <string>,
         "meal_type": <string>,
         "cuisine": <string>,
@@ -898,7 +814,6 @@ def unlike_recipe(user_id: int, recipe_id: int):
         "user_id": <integer>,
         "name": <string>,
         "time": <integer>,
-        "time_unit": <string>,
         "difficulty": <string>,
         "meal_type": <string>,
         "cuisine": <string>,
@@ -1031,7 +946,6 @@ def delete_recipe(recipe_id: int):
         "user_id": <integer>,
         "name": <string>,
         "time": <integer>,
-        "time_unit": <string>,
         "difficulty": <string>,
         "meal_type": <string>,
         "cuisine": <string>,
@@ -1089,23 +1003,6 @@ def delete_comment(comment_id: int):
     db.session.delete(comment)
     db.session.commit()
     return success_response(comment.serialize())
-
-
-@ app.route("/api/ingredients/name/<int:ingredient_name_id>/", methods=["DELETE"])
-def delete_ingredient_name(ingredient_name_id):
-    """
-    Deletes ingredient name with associated ingredient_name_id.
-    This removes the ingredient name entirely from the database.
-    Error 404 if this ingredient name never existed to begin with.
-    Returns the deleted ingredient name.
-    """
-    ingredient_name = IngredientName.query.filter_by(
-        id=ingredient_name_id).first()
-    if ingredient_name is None:
-        return failure_response("Ingredient name not found!", 404)
-    db.session.delete(ingredient_name)
-    db.session.commit()
-    return success_response(ingredient_name.serialize())
 
 
 if __name__ == "__main__":
