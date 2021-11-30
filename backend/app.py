@@ -481,11 +481,6 @@ def register_account():
         "update_expiration": str(user.update_expiration)
     }, 201)
 
-    # new_user = User(username=username, email=email, password=password)
-    # db.session.add(new_user)
-    # db.session.commit()
-    # return success_response(new_user.serialize(), 201)
-
 
 @app.route("/api/users/login/", methods=["POST"])
 def login():
@@ -595,9 +590,9 @@ def get_user_from_validated_session():
 
 
 @app.route("/api/recipes/<int:user_id>/", methods=["POST"])
-def add_recipe_for_user(user_id: int):
+def post_recipe_for_user(user_id: int):
     """
-    Description: Adds a recipe to a specific user profile.
+    Description: Posts a new recipe to a specific user profile.
     Returns the newly created recipe.
     Method: POST
     Query Parameters: user_id
@@ -726,7 +721,52 @@ def add_recipe_for_user(user_id: int):
 
 
 @app.route("/api/recipes/<int:recipe_id>/update/", methods=["POST"])
-def modify_recipe(recipe_id):
+def update_recipe(recipe_id):
+    """
+    Description: Modifies an existing recipe. Returns the modified recipe.
+    Method: POST
+    Query Parameters: recipe_id
+    Headers: None
+    Body: {
+            "name": <string>,
+            "time": <integer>,
+            "difficulty: <string>,
+            "meal_type": <string>,
+            "cuisine": <string>,
+            "ingredients": [
+                {
+                    "name": <string>,
+                    "amount": <integer>,
+                    "unit": <string>
+                },
+                ...
+            ],
+            "instructions": [
+                {
+                    "step_number": <integer>
+                    "step": <string>
+                },
+                ...
+            ]
+        }
+    Return: {
+        "id": <integer>,
+        "user_id": <integer>,
+        "name": <string>,
+        "time": <integer>,
+        "difficulty": <string>,
+        "meal_type": <string>,
+        "cuisine": <string>,
+        "ingredients": <ingredients-list-without-recipe-ids>,
+        "instructions": <instructions-list-without-recipe-ids>,
+        "comments": <comments-list-without-recipe-ids>,
+        "number_of_likes": <integer>,
+        "users_liked": <users-list-without-recipes-liked>,
+        "created_at": <integer> <- unix time (time since epoch in 1970)
+    }
+    Success Response: 200
+    Error Responses: 404 if recipe not found.
+    """
     recipe = Recipe.query.filter_by(id=recipe_id).first()
     if recipe is None:
         return failure_response("Recipe not found!", 404)
@@ -738,16 +778,58 @@ def modify_recipe(recipe_id):
     difficulty = body.get("difficulty", recipe.difficulty)
     meal_type = body.get("meal_type", recipe.meal_type)
     cuisine = body.get("cuisine", recipe.cuisine)
-    ingredients = body.get("ingredients", recipe.ingredients)
-    instructions = body.get("instructions", recipe.instructions)
+
+    ingredients = body.get("ingredients")
+    if ingredients is not None:
+        for i in ingredients:
+            n = i.get("name")
+            if n is None:
+                return failure_response("Name not specified for a given ingredient!", 400)
+            u = i.get("unit")
+            if u is None:
+                return failure_response("Unit not specified for a given ingredient!", 400)
+            a = i.get("amount")
+            if a is None:
+                return failure_response("Amount not specified for a given ingredient!", 400)
+    instructions = body.get("instructions")
+    if instructions is not None:
+        for i2 in instructions:
+            sn = i2.get("step_number")
+            if sn is None:
+                return failure_response("Step number not specified for a given instruction!", 400)
+            s = i2.get("step")
+            if s is None:
+                return failure_response("Step not given for a given instruction!", 400)
+            if len(s) == 0 or s.isspace():
+                return failure_response("No step can be only whitespace!", 400)
 
     recipe.name = name
     recipe.time = time
     recipe.difficulty = difficulty
     recipe.meal_type = meal_type
     recipe.cuisine = cuisine
-    recipe.ingredients = ingredients
-    recipe.instructions = instructions
+    if ingredients is not None:
+        for ing in recipe.ingredients:
+            db.session.delete(ing)
+        db.session.flush()
+        for ingredient in ingredients:
+            new_ingredient = Ingredient(recipe_id=recipe_id,
+                                        name=ingredient.get("name"),
+                                        amount=ingredient.get("amount"),
+                                        unit=ingredient.get("unit"))
+            db.session.add(new_ingredient)
+            recipe.ingredients.append(new_ingredient)
+    if instructions is not None:
+        for ins in recipe.instructions:
+            db.session.delete(ins)
+        db.session.flush()
+        for instruction in instructions:
+            new_instruction = Instruction(recipe_id=recipe_id,
+                                          step_number=instruction.get(
+                                              "step_number"),
+                                          step=instruction.get("step"))
+            db.session.add(new_instruction)
+            recipe.instructions.append(new_instruction)
 
     db.session.commit()
     return success_response(recipe.serialize())
@@ -898,6 +980,102 @@ def add_comment_from_user_to_recipe(user_id: int, recipe_id: int):
     db.session.commit()
     return success_response(new_comment.serialize(), 201)
 
+
+@app.route("/api/comments/<int:comment_id>/update/", methods=["POST"])
+def update_comment(comment_id):
+    """
+    Description: Edits a posted comment. Returns the editted comment.
+    Method: POST
+    Query Parameters: comment_id
+    Headers: None
+    Body: {
+            "text": <string>
+        }
+    Return: {
+        "id": <integer>,
+        "user_id": <integer>,
+        "recipe_id": <string>,
+        "text": <string>
+    }
+    Success Response: 200
+    Error Responses: 404 if comment not found.
+    """
+    comment = Comment.query.filter_by(id=comment_id).first()
+    if comment is None:
+        return failure_response("Comment does not exist!", 404)
+
+    body = json.loads(request.data)
+    text = body.get("text", comment.text)
+    comment.text = text
+    db.session.commit()
+
+    return success_response(comment.serialize())
+
+
+@app.route("/api/users/<int:user_id>/update/", methods=["POST"])
+def update_user(user_id):
+    """
+    Description: Updates a user's username, email, and/or password. Returns the
+    updated user.
+    Method: Post
+    Query Parameters: user_id
+    Headers: None
+    Body: {
+        "old_email": <string>,
+        "old_password": <string>,
+        "new_username": <string>,
+        "new_email": <string>,
+        "new_password": <string>
+    }
+    Return: {
+        "id": <integer>,
+        "username": <string>,
+        "email": <string>,
+        "posted_recipes": <recipe-list>,
+        "liked_recipes": <recipe-list-without-users-liked>,
+        "posted_comments": <comment-list-without-user-ids>
+    }
+    Sucess Response: 200
+    Error Responses: 404 if user does not exist.
+                     400 if old username or old password not specified.
+                     Ambiguous error code if old email or old password incorrect.
+                     403 if user with new username or new email already exists.
+    """
+    og_user = User.query.filter_by(id=user_id).first()
+    if og_user is None:
+        return failure_response("User not found!", 404)
+
+    body = json.loads(request.data)
+    old_email = body.get("old_email")
+    if old_email is None:
+        return failure_response("Original email not specified!", 400)
+    old_password = body.get("old_password")
+    if old_password is None:
+        return failure_response("Original password not specified!", 400)
+
+    valid_creds, user = Authentication.verify_credentials(
+        old_email, old_password)
+    if not valid_creds:
+        return failure_response("Original email or password invalid!")
+
+    new_username = body.get("new_username", user.username)
+    new_user1 = User.query.filter_by(username=new_username).first()
+    if new_user1 is not None and user_id != new_user1.id:
+        return failure_response("A user with this username already exists!", 403)
+    og_user.username = new_username
+
+    new_email = body.get("new_email", user.email)
+    new_user2 = User.query.filter_by(email=new_email).first()
+    if new_user2 is not None and user_id != new_user2.id:
+        return failure_response("A user with this email already exists!", 403)
+    og_user.email = new_email
+
+    new_password = body.get("new_password")
+    if new_password is not None:
+        user.digest_new_password(new_password)
+
+    db.session.commit()
+    return success_response(og_user.serialize())
 
 # ------------------------------ DELETE METHODS ------------------------------ #
 
