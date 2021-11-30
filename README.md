@@ -1,7 +1,7 @@
 # hack-challenge-fa-2021
 
 ## App Name: 
-CornellCookbook
+Cornell Cookbook
 
 ## App Tagline: 
 _Sharing Big Red recipes with the Cornell community!_
