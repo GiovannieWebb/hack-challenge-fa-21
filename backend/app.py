@@ -156,7 +156,7 @@ def get_liked_recipes_from_user(user_id: int):
             ]
         }
     Success Response: 200
-    Error Responses: 404 if user does not exist
+    Error Responses: 404 if user does not exist.
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -196,7 +196,7 @@ def get_posted_recipes_from_user(user_id: int):
             ]
         }
     Success Response: 200
-    Error Responses: 404 if user does not exist
+    Error Responses: 404 if user does not exist.
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -236,7 +236,7 @@ def get_commented_on_recipes_from_user(user_id: int):
             ]
         }
     Success Response: 200
-    Error Responses: 404 if user does not exist
+    Error Responses: 404 if user does not exist.
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -358,6 +358,38 @@ def get_comments_by_user(user_id: int):
     return success_response({
         "posted_comments": [pc.serialize() for pc in user.posted_comments]
     })
+
+
+@app.route("/api/recipes/<int:recipe_id>/")
+def get_recipe_by_id(recipe_id):
+    """
+    Description: Returns the recipe with specified id.
+    Method: GET
+    Query Parameters: None
+    Body: None
+    Return: {
+        "id": <integer>,
+        "user_id": <integer>,
+        "name": <string>,
+        "time": <integer>,
+        "difficulty": <string>,
+        "meal_type": <string>,
+        "cuisine": <string>,
+        "ingredients": <ingredient-list-without-recipe-ids>,
+        "instructions": <instructions-list-without-recipe-ids>,
+        "comments": <comments-list-without-recipe-ids>,
+        "number_of_likes": <integer>,
+        "users_liked": <users-list-without-recipes>,
+        "users_commented": <users-list-without-recipes>,
+        "created_at": <integer> <- unix time (time since epoch in 1970)
+    }
+    Success Response: 200
+    Error Response: 404 if recipe does not exist.
+    """
+    recipe = Recipe.query.filter_by(id=recipe_id)
+    if recipe is None:
+        return failure_response("Recipe not found!", 404)
+    return success_response(recipe.serialize())
 
 
 @app.route("/api/recipes/filter/")
@@ -590,7 +622,7 @@ def get_user_from_validated_session():
 
 
 @app.route("/api/recipes/<int:user_id>/", methods=["POST"])
-def post_recipe_for_user(user_id: int):
+def post_new_recipe_for_user(user_id: int):
     """
     Description: Posts a new recipe to a specific user profile.
     Returns the newly created recipe.
