@@ -3,6 +3,7 @@ from datetime import datetime
 from time import mktime
 
 from db import db
+# from db import Asset
 from db import Authentication, Comment, Ingredient, Instruction, Recipe, User
 from constants import Constants
 from flask import Flask
@@ -395,7 +396,7 @@ def get_recipe_by_id(recipe_id):
 @app.route("/api/recipes/filter/")
 def get_recipes_by_filter():
     """
-    Description: Gets all recipes matching a certain criteria described by 
+    Description: Gets all recipes matching a certain criteria described by
     the filters. Returns the list of recipes that match the given filters.
     Method: GET
     Query Parameters: None
@@ -470,8 +471,8 @@ def get_recipes_by_filter():
 @app.route("/api/users/register/", methods=["POST"])
 def register_account():
     """
-    Description: Register's a new user account and adds that new user to the 
-    database. Returns user's session token and its expiration date, and user's 
+    Description: Register's a new user account and adds that new user to the
+    database. Returns user's session token and its expiration date, and user's
     update token and its expiration date.
     Method: POST
     Query Parameters: None
@@ -517,7 +518,7 @@ def register_account():
 @app.route("/api/users/login/", methods=["POST"])
 def login():
     """
-    Description: Logs a user in. Returns user's session token and its expiration 
+    Description: Logs a user in. Returns user's session token and its expiration
     date, and user's update token and expiration date.
     Method: POST
     Query Parameters: None
@@ -559,7 +560,7 @@ def login():
 @app.route("/api/users/session/update/", methods=["POST"])
 def update_session():
     """
-    Description: Updates a user's session. Returns user's session token and its 
+    Description: Updates a user's session. Returns user's session token and its
     expiration date, and user's update token and expiration date.
     Method: POST
     Query Parameters: None
@@ -593,7 +594,7 @@ def update_session():
 @app.route("/api/users/session/validate/")
 def get_user_from_validated_session():
     """
-    Description: Validates a user's session. Returns the (serialized) user of 
+    Description: Validates a user's session. Returns the (serialized) user of
     the validated session.
     Method: GET
     Query Parameters: None
@@ -940,7 +941,7 @@ def unlike_recipe(user_id: int, recipe_id: int):
     }
     Success Response: 200
     Error Responses: 404 if user or recipe not found.
-                     403 if the user didn't have this recipe liked in the first 
+                     403 if the user didn't have this recipe liked in the first
                      place.
     """
     user = User.query.filter_by(id=user_id).first()
@@ -1109,6 +1110,65 @@ def update_user(user_id):
     db.session.commit()
     return success_response(og_user.serialize())
 
+
+'''
+@app.route("/api/images/upload/", methods=["POST"])
+def upload_image():
+    """
+    Description: Uploads an image to a user profile or recipe.
+    Method: Post
+    Query Parameters: NONE
+    Headers: None
+    Body: {
+        "user_id": <integer>,
+        "recipe_id": <integer>,
+        "image_data": <string> <- base 64 encoding of image,
+    }
+    Return: {
+        "url": <string>,
+        "created_at": <string>,
+        "user_id": <integer>,
+        "recipe_id": <integer>
+    }
+    Sucess Response: 201
+    Error Responses: 404 if user does not exist or recipe does not exist.
+                     400 if user_id and recipe_id not specified.
+    """
+    body = json.loads(request.data)
+    image_data = body.get("image_data")
+    if image_data is None:
+        return failure_response("Image data not found!", 400)
+
+    user_id, recipe_id = body.get("user_id"), body.get("recipe_id")
+    if user_id is None and recipe_id is None:
+        return failure_response("Either a user or a recipe must be specified!", 400)
+
+    asset = None
+    if user_id is not None:
+        user = User.query.filter_by(id=user_id).first()
+        if user is None:
+            return failure_response("User not found!", 404)
+        asset = Asset(user_id=user_id, image_data=image_data)
+        db.session.add(asset)
+        db.session.flush()
+        db.session.refresh(asset)
+        user.image_id = asset.id
+
+    if recipe_id is not None:
+        recipe = Recipe.query.filter_by(id=recipe_id).first()
+        if recipe is None:
+            return failure_response("Recipe not found!", 404)
+        asset = Asset(recipe_id=recipe_id, image_data=image_data)
+        db.session.add(asset)
+        db.session.flush()
+        db.session.refresh(asset)
+        recipe.image_id = asset.id
+
+    db.session.commit()
+
+    return success_response(asset.serialize(), 201)
+'''
+
 # ------------------------------ DELETE METHODS ------------------------------ #
 
 
@@ -1122,12 +1182,12 @@ def delete_user(user_id: int):
     Headers: None
     Body: None
     Return: {
-        "id": <integer>,
-        "username": <string>,
-        "email": <string>,
-        "posted_recipes": <recipe-list>,
-        "liked_recipes": <recipe-list-without-users-liked>,
-        "posted_comments": <comment-list-without-user-ids>
+        "id": < integer > ,
+        "username": < string > ,
+        "email": < string > ,
+        "posted_recipes": < recipe-list > ,
+        "liked_recipes": < recipe-list-without-users-liked > ,
+        "posted_comments": < comment-list-without-user-ids >
     }
     Success Response: 200
     Error Responses: 404 if user not found.
@@ -1152,19 +1212,19 @@ def delete_recipe(recipe_id: int):
     Headers: None
     Body: None
     Return: {
-        "id": <integer>,
-        "user_id": <integer>,
-        "name": <string>,
-        "time": <integer>,
-        "difficulty": <string>,
-        "meal_type": <string>,
-        "cuisine": <string>,
-        "ingredients": <ingredients-list-without-recipe-ids>,
-        "instructions": <instructions-list-without-recipe-ids>,
-        "comments": <comment-list-without-recipe-ids>,
-        "number_of_likes": <integer>,
-        "users_liked": <user-list-without-recipes>,
-        "created_at": <integer> <- unix time (time since epoch in 1970)
+        "id": < integer > ,
+        "user_id": < integer > ,
+        "name": < string > ,
+        "time": < integer > ,
+        "difficulty": < string > ,
+        "meal_type": < string > ,
+        "cuisine": < string > ,
+        "ingredients": < ingredients-list-without-recipe-ids > ,
+        "instructions": < instructions-list-without-recipe-ids > ,
+        "comments": < comment-list-without-recipe-ids > ,
+        "number_of_likes": < integer > ,
+        "users_liked": < user-list-without-recipes > ,
+        "created_at": < integer > <- unix time(time since epoch in 1970)
     }
     Success Response: 200
     Error Responses: 404 if recipe not found.
@@ -1187,10 +1247,10 @@ def delete_comment(comment_id: int):
     Headers: None
     Body: None
     Return: {
-        "id": <integer>,
-        "user_id": <integer>,
-        "recipe_id": <integer>,
-        "text": <string>
+        "id": < integer > ,
+        "user_id": < integer > ,
+        "recipe_id": < integer > ,
+        "text": < string >
     }
     Success Response: 200
     Error Responses: 404 if comment not found.
