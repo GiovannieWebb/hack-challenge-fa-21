@@ -387,7 +387,7 @@ def get_recipe_by_id(recipe_id):
     Success Response: 200
     Error Response: 404 if recipe does not exist.
     """
-    recipe = Recipe.query.filter_by(id=recipe_id)
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
     if recipe is None:
         return failure_response("Recipe not found!", 404)
     return success_response(recipe.serialize())
