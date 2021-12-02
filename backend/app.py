@@ -541,7 +541,7 @@ def login():
     email = body.get("email")
     if email is None:
         return failure_response("Email not specified!", 400)
-    password = body.get("password", 400)
+    password = body.get("password")
     if password is None:
         return failure_response("Password not specified!", 400)
 
