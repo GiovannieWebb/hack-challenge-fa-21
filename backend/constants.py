@@ -8,17 +8,10 @@ class Constants:
     """
     valid_cuisines = [
         "american",
-        "italian",
         "asian",
+        "caribbean",
         "latin",
-        "mexican",
-        "jamaican",
-        "japanese",
-        "chinese",
-        "korean",
-        "indian",
-        "other"
-    ]
+        "african"    ]
 
     valid_difficulty_levels = [
         "beginner",
