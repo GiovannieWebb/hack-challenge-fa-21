@@ -20,10 +20,10 @@ class ViewController: UIViewController {
     
     private let button: UIButton = {
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 200, height: 52))
-        button.setTitle("Log in", for: .normal)
+        button.setTitle("Click to open", for: .normal)
         button.layer.borderWidth = 5
         button.layer.cornerRadius = 8
-        button.layer.borderColor = CGColor(red: 1.0, green: 0.36, blue: 0.01, alpha: 1.0)
+        button.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1).cgColor
         button.backgroundColor = .white
         button.setTitleColor(.black, for: .normal)
         return button
@@ -31,6 +31,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
         title = "Welcome to Cornell Cookbook"
         //button
         button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
@@ -43,27 +44,351 @@ class ViewController: UIViewController {
     }
     
     @objc func didTapButton() {
-        button.backgroundColor = .lightGray
+        button.backgroundColor = UIColor(red: 0.162, green: 0.162, blue: 0.162, alpha: 1)
         let tabBarVC = UITabBarController()
-//        let vc2 = SecondViewController()
+        let vc3 = SearchViewController()
         let vc1 = HomeViewController()
         let vc2 = ProfileViewController()
-        tabBarVC.setViewControllers([vc1, vc2], animated: false)
-        tabBarVC.modalPresentationStyle = .fullScreen
         
+//        vc3.title = "Search"
+//        vc1.title = "Home"
+//        vc2.title = "Profile"
+        
+        tabBarVC.setViewControllers([vc3, vc1, vc2], animated: false)
+        
+        guard let items1 = tabBarVC.tabBar.items else {
+            return
+        }
+        
+        let images = ["search", "home","profile" ]
+
+        for x in 0..<items1.count {
+            items1[x].image = UIImage(named: images[x])
+        }
+        
+        tabBarVC.tabBar.barTintColor = UIColor(red: 0.267, green: 0.259, blue: 0.259, alpha: 1)
+//       wrong color fix later
+        tabBarVC.modalPresentationStyle = .fullScreen
         present(tabBarVC, animated: true)
+        tabBarVC.selectedIndex = 1
     }
 
 }
 class ProfileViewController: UIViewController {
 
+    let titleLabel = UILabel()
+    let yourRecipes = UIButton()
+    let savedRecipes = UIButton()
+    let newRecipeButton = UIButton()
+    let filter = UIButton()
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .yellow
-        title = "Profile"
+        view.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
+//        title = "Profile"
+        titleLabel.text = "Karen C"
+        titleLabel.font = UIFont(name: "Galvji-Bold", size: 30)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        
+        filter.setTitle("Filter", for: .normal)
+        filter.setTitleColor(.black, for: .normal)
+        filter.translatesAutoresizingMaskIntoConstraints = false
+        filter.addTarget(self, action: #selector(showFilters), for: .touchUpInside)
+        
+
+        if let image = UIImage(named: "new") {
+                newRecipeButton.setImage(image, for: .normal)
+        }
+        newRecipeButton.translatesAutoresizingMaskIntoConstraints = false
+        newRecipeButton.addTarget(self, action: #selector(newRecipe), for: .touchUpInside)
+
+        
+        
+        view.addSubview(filter)
+        view.addSubview(titleLabel)
+        setupConstraints()
+    }
+    
+    @objc func showFilters() {
+        let pop = FilterPopUp()
+        view.addSubview(pop)
+    }
+    
+    @objc func newRecipe() {
+//        let pop = FilterPopUp()
+//        view.addSubview(pop)
+    }
+    
+    func setupConstraints() {
+        
+        NSLayoutConstraint.activate([
+            titleLabel.widthAnchor.constraint(equalToConstant: 268),
+            titleLabel.heightAnchor.constraint(equalToConstant: 40),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 7),
+            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 84)
+        ])
+        NSLayoutConstraint.activate([
+            filter.widthAnchor.constraint(equalToConstant: 40),
+
+            filter.heightAnchor.constraint(equalToConstant: 23),
+            filter.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 296),
+
+            filter.topAnchor.constraint(equalTo: view.topAnchor, constant: 93)
+        ])
+        
     }
 }
 
+class resultsController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
+    }
+}
+
+class SearchViewController: UIViewController,  UISearchBarDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, UpdateIngredientsDelegate  {
+    func updateIngredients(newString: String) {
+        featureRecipes[1][1].name = newString
+    }
+    
+    func updateInstructions(newString: String) {
+        featureRecipes[1][1].name = newString
+    }
+    
+    
+//    func updateInstructions(newInstruction: Instructions) {
+//        featureRecipes[1][1].name = [newInstruction]
+//    }
+    
+    func updateName(newString: String) {
+        featureRecipes[1][1].name = newString
+    }
+    
+    
+//    func updateIngredients(newIngredient: Ingredients) {
+//        featureRecipes[1][1].ingredients = [newIngredient]
+//    }
+
+    let searchControl = UISearchBar()
+    let titleLabel = UILabel()
+    let filter = UIButton()
+    
+    let popularLabel = UILabel()
+    let featureLabel = UILabel()
+    let recentlyLabel = UILabel()
+    
+    var featureCollectionView : UICollectionView!
+    
+    var featureSection = ["Featured"]
+//    getAllRecipes()
+    var featureRecipes : [[Recipie]] =
+        [[Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)]]
+        
+    let recipieCellReuseIdentifier = "recipieCellReuseIdentifier"
+//    let headerReuseIdentifier = "headerReuseIdentifer"
+    let cellPadding: CGFloat = 10
+    let sectionPadding: CGFloat = 5
+    
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
+        
+        searchControl.searchBarStyle = UISearchBar.Style.default
+        searchControl.placeholder = " Search..."
+
+        searchControl.keyboardType = .default
+        searchControl.isTranslucent = true
+        searchControl.backgroundImage = UIImage()
+        searchControl.delegate = self
+        searchControl.translatesAutoresizingMaskIntoConstraints = false
+        
+        titleLabel.text = "Discover"
+        titleLabel.font = UIFont(name: "Galvji-Bold", size: 30)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        popularLabel.text = "Popular"
+        popularLabel.font = UIFont(name: "Galvji", size: 20)
+        popularLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        featureLabel.text = "Featured"
+        featureLabel.font = UIFont(name: "Galvji", size: 20)
+        featureLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        recentlyLabel.text = "Recently Added"
+        recentlyLabel.font = UIFont(name: "Galvji", size: 20)
+        recentlyLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        
+        filter.setTitle("Filter", for: .normal)
+        filter.setTitleColor(.black, for: .normal)
+        filter.translatesAutoresizingMaskIntoConstraints = false
+        filter.addTarget(self, action: #selector(showFilters), for: .touchUpInside)
+        
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumLineSpacing = cellPadding
+        layout.minimumInteritemSpacing = cellPadding
+        layout.scrollDirection = .horizontal
+        layout.itemSize = CGSize(width: 115, height: 115)
+        
+        featureCollectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        featureCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        featureCollectionView.backgroundColor = .clear
+//        featureCollectionView.layer.contents.
+        
+        
+        featureCollectionView.register(RowCollectionViewCell.self, forCellWithReuseIdentifier: recipieCellReuseIdentifier)
+        
+        featureCollectionView.dataSource = self
+        
+        featureCollectionView.delegate = self
+//
+//        featureCollectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerReuseIdentifier)
+        
+        view.addSubview(featureCollectionView)
+        view.addSubview(searchControl)
+        view.addSubview(titleLabel)
+        view.addSubview(filter)
+        
+        view.addSubview(popularLabel)
+        view.addSubview(featureLabel)
+        view.addSubview(recentlyLabel)
+        setupConstraints()
+    }
+    
+    @objc func showFilters() {
+        let pop = FilterPopUp()
+        view.addSubview(pop)
+    }
+    
+    func setupConstraints() {
+        
+        NSLayoutConstraint.activate([
+            titleLabel.widthAnchor.constraint(equalToConstant: 134),
+            titleLabel.heightAnchor.constraint(equalToConstant: 40),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 7),
+            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 84)
+        ])
+        
+        NSLayoutConstraint.activate([
+            filter.widthAnchor.constraint(equalToConstant: 40),
+
+            filter.heightAnchor.constraint(equalToConstant: 23),
+            filter.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 296),
+
+            filter.topAnchor.constraint(equalTo: view.topAnchor, constant: 93)
+        ])
+        
+        NSLayoutConstraint.activate([
+            popularLabel.widthAnchor.constraint(equalToConstant: 101),
+
+            popularLabel.heightAnchor.constraint(equalToConstant: 45),
+
+            popularLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 13),
+
+            popularLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 164)
+        ])
+        
+        NSLayoutConstraint.activate([
+            featureLabel.widthAnchor.constraint(equalToConstant: 160),
+
+            featureLabel.heightAnchor.constraint(equalToConstant: 29),
+            featureLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 9),
+
+            featureLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 406)
+        ])
+        
+        NSLayoutConstraint.activate([
+            recentlyLabel.widthAnchor.constraint(equalToConstant: 160),
+
+            recentlyLabel.heightAnchor.constraint(equalToConstant: 29),
+
+            recentlyLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 7),
+
+            recentlyLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 647)
+        ])
+        
+        NSLayoutConstraint.activate([
+//            searchControl.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
+            searchControl.topAnchor.constraint(equalTo: view.topAnchor, constant: 125),
+            searchControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 7),
+//            searchControl.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100),
+            searchControl.heightAnchor.constraint(equalToConstant: 30),
+            searchControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -7)
+        ])
+        
+        let collectionViewPadding: CGFloat = 12
+        NSLayoutConstraint.activate([
+            featureCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 164),
+            featureCollectionView.heightAnchor.constraint(equalToConstant: 217),
+            featureCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: collectionViewPadding),
+//            featureCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -collectionViewPadding),
+            featureCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -collectionViewPadding)
+        ])
+    }
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+//        return featureRecipes[0].count
+        return featureSection.count
+    }
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+//        return featureSection.count
+        return featureRecipes[section].count
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: recipieCellReuseIdentifier, for: indexPath) as! RowCollectionViewCell
+        let recipie = featureRecipes[indexPath.section][indexPath.item]
+        cell.configure(for: recipie)
+        return cell
+    }
+
+//    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+//        let header = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerReuseIdentifier, for: indexPath) as! HeaderView
+//        let section = featureSection[indexPath.section]
+//        header.configure(for: section)
+//        return header
+//    }
+    
+    func searchBarSearchButtonClicked(_searchBar: UISearchBar) {
+        
+    }
+    
+    func searchBarTextDidBeginEditing(_searchBar: UISearchBar) {
+        
+    }
+    
+    func searchBarTextDidEndEditing(_searchBar: UISearchBar) {
+        
+    }
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+    
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: 115, height: 115)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.frame.width, height: 200)
+    }
+
+    
+    //present view controller
+//    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+//        featureRecipes[indexPath.section][indexPath.item].isSelected.toggle()
+//        if featureRecipes[indexPath.section][indexPath.item].isSelected {
+//            let vc = PresentViewController(delegate: self, placeholderName: featureRecipes[indexPath.section][indexPath.item].name, placeholderIngredients: featureRecipes[indexPath.section][indexPath.item].ingredients, placeholderInstructions: featureRecipes[indexPath.section][indexPath.item].instructions)
+//            self.present(vc, animated: true, completion: nil)
+//        }
+//        collectionView.reloadData()
+//    }
+    
+}
 
 class HomeViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, UpdateIngredientsDelegate  {
     
@@ -82,8 +407,11 @@ class HomeViewController: UIViewController, UICollectionViewDataSource, UICollec
     
     
     var recipieCollectionView : UICollectionView!
+    var featureCollectionView : UICollectionView!
     
+    var featureSection = ["Featured"]
     var sections = ["Breakfast", "Lunch", "Dinner", "Snack"]
+    var featureRecipes : [[Recipie]] = []
     var recipies : [[Recipie]] = [
         [Recipie(name: "Name: Baked Oatmeal", instructions: "Instructions: Preheat the oven to 375 degrees. Grease a 9-inch square baking dish. Once the oven has finished preheating, pour the nuts onto a rimmed baking sheet.Toast for 4 to 5 minutes, until fragrant. In a medium mixing bowl, combine the oats, toasted nuts, cinnamon, baking powder, salt and nutmeg. Whisk to combine. In a smaller mixing bowl, combine the milk, maple syrup or honey, egg, half of the butter or coconut oil, and vanilla. Whisk until blended. (If you used coconut oil and it solidified in contact with the cold ingredients, briefly microwave the bowl in 30 second increments, just until the coconut oil melts again.) Reserve about ½ cup of the berries for topping the baked oatmeal, then arrange the remaining berries evenly over the bottom of the baking dish (no need to defrost frozen fruit first). Cover the fruit with the dry oat mixture, then drizzle the wet ingredients over the oats. Wiggle the baking dish to make sure the milk moves down through the oats, then gently pat down any dry oats resting on top. Scatter the remaining berries across the top. Sprinkle some raw sugar on top if you’d like some extra sweetness and crunch. Bake for 42 to 45 minutes (if using frozen berries, 45 to 50 minutes), until the top is nice and golden. Remove your baked oatmeal from the oven and let it cool for a few minutes. Drizzle the remaining melted butter on the top before serving. Serve as-is or with toppings of your choice. I prefer this baked oatmeal served warm, but it is also good at room temperature or chilled. This oatmeal keeps well in the refrigerator, covered, for 4 to 5 days. If desired, simply reheat individual portions in the microwave before serving.", ingredients: "Ingredients: oats, milk, butter, sugar", cuisine: "Breakfast"),Recipie(name: "Baked Oatmeal", instructions: "Bake at 350 in oven 20 minutes ..", ingredients: "oats, milk, butter, sugar", cuisine: "Breakfast"), Recipie(name: "Baked Oatmeal", instructions: "Bake at 350 in oven 20 minutes ..", ingredients: "oats, milk, butter, sugar", cuisine: "Breakfast")  ],
         [ Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine:"Lunch"), Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine:"Lunch")],
@@ -98,9 +426,9 @@ class HomeViewController: UIViewController, UICollectionViewDataSource, UICollec
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Home"
+//        title = "Home"
         // .orange
-        view.backgroundColor = .systemGray
+        view.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
         // Do any additional setup after loading the view.
         
         let layout = UICollectionViewFlowLayout()
