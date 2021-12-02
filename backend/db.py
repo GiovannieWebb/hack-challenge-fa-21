@@ -384,7 +384,7 @@ class Ingredient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     name = db.Column(db.String, nullable=False)
-    amount = db.Column(db.Integer, nullable=False)
+    amount = db.Column(db.Float, nullable=False)
     unit = db.Column(db.String, nullable=False)
 
     def __init__(self, **kwargs):

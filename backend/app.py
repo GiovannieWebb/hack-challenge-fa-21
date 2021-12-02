@@ -261,7 +261,7 @@ def get_ingredients_for_specific_recipe(recipe_id: int):
                     "id": <integer>,
                     "recipe_id": <integer>,
                     "name": <string>,
-                    "amount": <integer>,
+                    "amount": <float>,
                     "unit": <string>
                 },
                 ...
@@ -639,7 +639,7 @@ def post_new_recipe_for_user(user_id: int):
             "ingredients": [
                 {
                     "name": <string>,
-                    "amount": <integer>,
+                    "amount": <float>,
                     "unit": <string>
                 },
                 ...
@@ -769,7 +769,7 @@ def update_recipe(recipe_id):
             "ingredients": [
                 {
                     "name": <string>,
-                    "amount": <integer>,
+                    "amount": <float>,
                     "unit": <string>
                 },
                 ...

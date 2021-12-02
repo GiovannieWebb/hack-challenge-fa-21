@@ -21,9 +21,9 @@ class Constants:
 
         "american",
         "asian",
-        "african",
         "caribbean",
-        "latin"
+        "latin",
+        "african"    
     ]
 
     valid_difficulty_levels = [
