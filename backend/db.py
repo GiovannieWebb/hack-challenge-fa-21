@@ -1,3 +1,17 @@
+"""
+import base64
+import boto3
+from io import BytesIO
+
+# mimetype: ex: images/png -> guess_extension guesses file extension
+from mimetypes import guess_extension, guess_type
+import os
+from PIL import Image  # image handling
+import random  # for salting
+import re  # for regex (regular expressions)
+import string
+"""
+
 import datetime
 import hashlib
 import os
@@ -10,11 +24,87 @@ db = SQLAlchemy()
 
 """
 TODO:
-    - Images
-        - Demo on how to store images using Amazon S3
-        - Watch backend lecture on images
     - Containerize
     - Deploy
+"""
+
+"""
+EXTENSIONS = ["png", "jpg", "jpeg"]
+BASE_DIR = os.getcwd()
+S3_BUCKET = 'backendimages'
+S3_BASE_URL = f"https://{S3_BUCKET}.s3-us-east-2.amazonaws.com"
+
+
+class Asset(db.Model):
+    __tablename__ = 'asset'
+
+    id = db.Column(db.Integer, primary_key=True)
+    base_url = db.Column(db.String, nullable=False)
+    salt = db.Column(db.String, nullable=False)
+    extension = db.Column(db.String, nullable=False)
+    width = db.Column(db.Integer, nullable=False)
+    height = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
+
+    user_id = db.Column(db.Integer, nullable=True)
+    recipe_id = db.Column(db.Integer, nullable=True)
+
+    def __init__(self, **kwargs):
+        self.user_id = kwargs.get("user_id")
+        self.recipe_id = kwargs.get("recipe_id")
+        self.create(kwargs.get('image_data'))
+
+    def serialize(self):
+        return {
+            "url": f"{self.base_url}/{self.salt}.{self.extension}",
+            "created_at": str(self.created_at),
+            "user_id": self.user_id,
+            "recipe_id": self.recipe_id
+        }
+
+    def create(self, image_data):
+        try:
+            ext = guess_extension(guess_type(image_data)[0])[1:]
+            if ext not in EXTENSIONS:
+                raise Exception(f'Extension {ext} not supported!')
+
+            salt = "".join(
+                random.SystemRandom().choice(
+                    string.ascii_uppercase + string.digits
+                )
+                for _ in range(16)
+            )
+
+            img_str = re.sub("^data:image/.+;base64,", "", image_data)
+            img_data = base64.b64decode(img_str)
+            img = Image.open(BytesIO(img_data))
+
+            self.base_url = S3_BASE_URL
+            self.salt = salt
+            self.extension = ext
+            self.width = img.width
+            self.height = img.height
+            self.created_at = datetime.datetime.now()
+
+            img_filename = f"{salt}.{ext}"
+            self.upload(img, img_filename)
+        except Exception as e:
+            print(f"Couldn't create image: {e}")
+
+    def upload(self, img, img_filename):
+        try:
+            img_temploc = f"{BASE_DIR}/{img_filename}"
+            img.save(img_temploc)
+
+            s3_client = boto3.client("s3")
+            s3_client.upload_file(img_temploc, S3_BUCKET, img_filename)
+
+            s3_resource = boto3.resource("s3")
+            object_acl = s3_resource.ObjectAcl(S3_BUCKET, img_filename)
+            object_acl.put(ACL="public-read")
+            os.remove(img_temploc)
+        except Exception as e:
+            print(f"Image upload failure: {e}")
 """
 
 
@@ -118,7 +208,10 @@ class User(db.Model):
     commented_on_recipes = db.relationship(
         "Recipe", secondary=AssociationTables.user_commented_on_recipes, back_populates="users_commented")
 
+    # image_id = db.Column(db.Integer, nullable=True)
+
     def __init__(self, **kwargs):
+        # self.image_id = kwargs.get("image_id")
         self.username = kwargs.get("username")
         self.email = kwargs.get("email")
         self.password_digest = bcrypt.hashpw(kwargs.get(
@@ -161,7 +254,8 @@ class User(db.Model):
             "posted_recipes": [pr.serialize_without_user_id() for pr in self.posted_recipes],
             "liked_recipes": [lr.serialize_without_users_liked_or_commented() for lr in self.liked_recipes],
             "posted_comments": [pc.serialize_without_user_id() for pc in self.posted_comments],
-            "commented_on_recipes": [cor.serialize_without_users_liked_or_commented() for cor in self.commented_on_recipes]
+            "commented_on_recipes": [cor.serialize_without_users_liked_or_commented() for cor in self.commented_on_recipes],
+            # "image_id": self.image_id
         }
 
     def serialize_without_recipes(self):
@@ -169,7 +263,8 @@ class User(db.Model):
             "id": self.id,
             "username": self.username,
             "email": self.email,
-            "posted_comments": [pc.serialize_without_user_id() for pc in self.posted_comments]
+            "posted_comments": [pc.serialize_without_user_id() for pc in self.posted_comments],
+            # "image_id": self.image_id
         }
 
 
@@ -208,8 +303,10 @@ class Recipe(db.Model):
     users_commented = db.relationship(
         "User", secondary=AssociationTables.user_commented_on_recipes, back_populates="commented_on_recipes")
     created_at = db.Column(db.Integer, nullable=False)  # unix time
+    # image_id = db.Column(db.Integer, nullable=True)
 
     def __init__(self, **kwargs):
+        # self.image_id = kwargs.get("image_id")
         self.user_id = kwargs.get("user_id")
         self.name = kwargs.get("name")
         self.time = kwargs.get("time")
@@ -234,7 +331,8 @@ class Recipe(db.Model):
             "number_of_likes": self.number_of_likes,
             "users_liked": [ul.serialize_without_recipes() for ul in self.users_liked],
             "users_commented": [uc.serialize_without_recipes() for uc in self.users_commented],
-            "created_at": self.created_at
+            "created_at": self.created_at,
+            # "image_id": self.image_id
         }
 
     def serialize_without_user_id(self):
@@ -251,7 +349,8 @@ class Recipe(db.Model):
             "number_of_likes": self.number_of_likes,
             "users_liked": [ul.serialize_without_recipes() for ul in self.users_liked],
             "users_commented": [uc.serialize_without_recipes() for uc in self.users_commented],
-            "created_at": self.created_at
+            "created_at": self.created_at,
+            # "image_id": self.image_id
         }
 
     def serialize_without_users_liked_or_commented(self):
@@ -267,7 +366,8 @@ class Recipe(db.Model):
             "instructions": sorted([ins.serialize_without_recipe_id() for ins in self.instructions], key=lambda x: x.get("step_number")),
             "comments": [c.serialize_without_recipe_id() for c in self.comments],
             "number_of_likes": self.number_of_likes,
-            "created_at": self.created_at
+            "created_at": self.created_at,
+            # "image_id": self.image_id
         }
 
 

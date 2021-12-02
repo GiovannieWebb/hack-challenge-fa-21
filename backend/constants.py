@@ -7,17 +7,23 @@ class Constants:
     maintain. Normally isn't good practice, but should be fine for this app.
     """
     valid_cuisines = [
+        # "american",
+        # "italian",
+        # "asian",
+        # "latin",
+        # "mexican",
+        # "jamaican",
+        # "japanese",
+        # "chinese",
+        # "korean",
+        # "indian",
+        # "other"
+
         "american",
-        "italian",
         "asian",
-        "latin",
-        "mexican",
-        "jamaican",
-        "japanese",
-        "chinese",
-        "korean",
-        "indian",
-        "other"
+        "african",
+        "caribbean",
+        "latin"
     ]
 
     valid_difficulty_levels = [
