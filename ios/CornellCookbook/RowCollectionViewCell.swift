@@ -31,23 +31,26 @@ class RowCollectionViewCell: UICollectionViewCell {
         recipieImageView.layer.cornerRadius = 8
         recipieImageView.layer.borderWidth = 1
         
-        recipeName.text = "placeholder"
+        recipeName.text = "Cereal"
         recipeName.font = UIFont(name: "Galvji", size: 12)
         recipeName.translatesAutoresizingMaskIntoConstraints = false
         
-        time.text = "time"
+        time.text = "5 min"
+        time.textAlignment = .center
         time.font = UIFont(name: "Galvji", size: 8)
         time.layer.cornerRadius = 9
         time.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
         time.translatesAutoresizingMaskIntoConstraints = false
         
-        cuisine.text = "cuisine"
+        cuisine.text = "American"
         cuisine.font = UIFont(name: "Galvji", size: 8)
         cuisine.layer.cornerRadius = 9
         cuisine.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
+        cuisine.textAlignment = .center
         cuisine.translatesAutoresizingMaskIntoConstraints = false
         
-        difficulty.text = "difficulty"
+        difficulty.text = "Beginner"
+        difficulty.textAlignment = .center
         difficulty.layer.cornerRadius = 9
         difficulty.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
         difficulty.font = UIFont(name: "Galvji", size: 8)
@@ -89,15 +92,16 @@ class RowCollectionViewCell: UICollectionViewCell {
         NSLayoutConstraint.activate([
             time.topAnchor.constraint(equalTo: recipeName.bottomAnchor, constant: 2),
             time.heightAnchor.constraint(equalToConstant: 17),
-//            time.centerXAnchor.constraint(equalTo: recipieImageView.centerXAnchor),
+            time.centerXAnchor.constraint(equalTo: recipieImageView.centerXAnchor, constant: 32),
             time.widthAnchor.constraint(equalToConstant: 48),
-            time.leadingAnchor.constraint(equalTo: contentView.leadingAnchor)
+//            time.leadingAnchor.constraint(equalTo: contentView.leadingAnchor)
         ])
         NSLayoutConstraint.activate([
             difficulty.topAnchor.constraint(equalTo: recipeName.bottomAnchor, constant: 2),
             difficulty.heightAnchor.constraint(equalToConstant: 17),
             difficulty.widthAnchor.constraint(equalToConstant: 48),
-            difficulty.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -17)
+//            difficulty.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -17)
+            difficulty.centerXAnchor.constraint(equalTo: recipieImageView.centerXAnchor, constant: -32)
         ])
         NSLayoutConstraint.activate([
             cuisine.topAnchor.constraint(equalTo: time.bottomAnchor, constant: 2),

@@ -17,20 +17,20 @@ class IngredientTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        nameLabel.font = .boldSystemFont(ofSize: 14)
+        nameLabel.font = UIFont(name: "Galvji", size: 15)
         nameLabel.textColor = .black
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(nameLabel)
         
-        unitLabel.font = .boldSystemFont(ofSize: 14)
+        unitLabel.font = UIFont(name: "Galvji", size: 15)
         unitLabel.textColor = .black
         unitLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(unitLabel)
         
-        amountLabel.font = .boldSystemFont(ofSize: 14)
+        amountLabel.font = UIFont(name: "Galvji", size: 15)
         amountLabel.textColor = .black
         amountLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(unitLabel)
+        contentView.addSubview(amountLabel)
 
 
         coverImageView.contentMode = .scaleAspectFit
@@ -57,25 +57,24 @@ class IngredientTableViewCell: UITableViewCell {
             coverImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             coverImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding)
         ])
-        
+//
         NSLayoutConstraint.activate([
             nameLabel.leadingAnchor.constraint(equalTo: coverImageView.trailingAnchor, constant: padding),
             nameLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             nameLabel.heightAnchor.constraint(equalToConstant: labelHeight)
         ])
-        
+//
         NSLayoutConstraint.activate([
             amountLabel.leadingAnchor.constraint(equalTo: nameLabel.trailingAnchor, constant: padding),
             amountLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             amountLabel.heightAnchor.constraint(equalToConstant: labelHeight)
         ])
-        
+//
         NSLayoutConstraint.activate([
             unitLabel.leadingAnchor.constraint(equalTo: amountLabel.trailingAnchor, constant: padding),
             unitLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             unitLabel.heightAnchor.constraint(equalToConstant: labelHeight)
         ])
-
     }
 
 

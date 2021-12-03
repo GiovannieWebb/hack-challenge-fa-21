@@ -11,16 +11,17 @@ import Alamofire
 class NetworkManager{
 
     //what is the host
-    static let host = "http://143.198.115.54:8080/"
+    static let host = "https://cookbookendpoints.herokuapp.com/api/"
     
     
     //get Methods
     static func getAllUsers(completion: @escaping ([User]) -> Void) {
-        AF.request(host, method: .get).validate().responseData { response in
+        AF.request("https://cookbookendpoints.herokuapp.com/api/users/", method: .get).validate().responseData { response in
             switch response.result {
             case .success(let data):
                 let jsonDecoder = JSONDecoder()
                 if let post = try? jsonDecoder.decode([User].self, from: data) {
+//                    po String(data: post as! Data, encoding: String.Encoding.utf8)
                     completion(post)
                 }
             case .failure(let error):
@@ -32,12 +33,13 @@ class NetworkManager{
     
     static func getAllRecipes (completion: @escaping ([Recipie]) -> Void)
     {
-        AF.request(host, method: .get).validate().responseData { response in
+        AF.request("https://cookbookendpoints.herokuapp.com/api/recipes/", method: .get).validate().responseData { response in
             switch response.result {
-            case .success(let data):
+            case .success(let recipes):
                 let jsonDecoder = JSONDecoder()
-                if let post = try? jsonDecoder.decode([Recipie].self, from: data) {
-                    completion(post)
+                if let recipeResponse = try? jsonDecoder.decode(RecipeResponse.self, from: recipes) {
+                    let recipes = recipeResponse.recipes
+                    completion(recipes)
                 }
             case .failure(let error):
                 print(error)
@@ -198,7 +200,7 @@ class NetworkManager{
     }
     }
     
-    
+    //MARK: Post Methods
     //post methods
     static func registerAccount (completion: @escaping ([Recipie]) -> Void)
     {
@@ -206,6 +208,7 @@ class NetworkManager{
             switch response.result {
             case .success(let data):
                 let jsonDecoder = JSONDecoder()
+                jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
                 if let post = try? jsonDecoder.decode([Recipie].self, from: data) {
                     completion(post)
                 }
@@ -240,9 +243,24 @@ class NetworkManager{
         
     }
     
-    static func postRecipeForUser (completion: @escaping ([Recipie]) -> Void)
+    static func postRecipeForUser (userId: Int, completion: @escaping (Recipie) -> Void)
     {
+        let parameters: [String: Int] = [
+            "user_id": userId
+        ]
         
+        AF.request("\(host)/recipes/1/", method: .post, parameters: parameters, encoding: JSONEncoding.default).validate().responseData { response in
+            switch response.result {
+            case .success(let data):
+                let jsonDecoder = JSONDecoder()
+                if let recipeResponse = try? jsonDecoder.decode(RecipeResponse.self, from: data) {
+                    let recipe = recipeResponse.recipes
+                    completion(recipe[0])
+                }
+            case .failure(let error):
+                print(error)
+            }
+    }
     }
     
     

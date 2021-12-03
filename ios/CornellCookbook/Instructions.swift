@@ -10,9 +10,11 @@ import UIKit
 class Instructions: Codable {
     var stepNumber: Int
     var step: String
+    var id: Int
     
-    init(stepNumber: Int, step: String) {
+    init(id: Int, stepNumber: Int, step: String) {
         self.stepNumber = stepNumber
+        self.id = id 
         self.step = step
     }
 }

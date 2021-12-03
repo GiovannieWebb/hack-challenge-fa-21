@@ -8,6 +8,10 @@
 import Foundation
 import UIKit
 
+struct RecipeResponse: Codable {
+    var recipes: [Recipie]
+}
+
 struct Recipie: Codable {
     
     var userId: Int
@@ -23,6 +27,7 @@ struct Recipie: Codable {
     var usersLiked: [User]
     var usersCommented: [User]
     var createdAt: Int
+    
     var isSelected: Bool
     var imageName: String
     
