@@ -669,7 +669,7 @@ def post_new_recipe_for_user(user_id: int):
         "users_liked": [],
         "created_at": <integer> <- unix time (time since epoch in 1970)
     }
-    Success Response: 200
+    Success Response: 201
     Error Responses: 404 if user not found.
                      400 if any fields not specified.
     """
@@ -738,7 +738,7 @@ def post_new_recipe_for_user(user_id: int):
     # add ingredients
     for ingredient in ingredients:
         new_ingredient = Ingredient(recipe_id=recipe_id,
-                                    name=name,
+                                    name=ingredient.get("name"),
                                     amount=ingredient.get("amount"),
                                     unit=ingredient.get("unit"))
         db.session.add(new_ingredient)

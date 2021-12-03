@@ -23,7 +23,8 @@ class Constants:
         "asian",
         "caribbean",
         "latin",
-        "african"    
+        "african",
+        "other"
     ]
 
     valid_difficulty_levels = [
@@ -36,7 +37,8 @@ class Constants:
         "breakfast",
         "lunch",
         "dinner",
-        "snack"
+        "snack",
+        "other"
     ]
 
     default_time = {
