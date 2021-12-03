@@ -223,7 +223,7 @@ class User(db.Model):
         return hashlib.sha1(os.urandom(64)).hexdigest()
 
     def renew_session(self):
-        """ Generates new tokens and resets expiration time. """
+        """ Generates new tokens and resets expiration times. """
         self.session_token = self._urlsafe_base_64()
         self.session_expiration = datetime.datetime.now() + datetime.timedelta(days=1)
         self.update_token = self._urlsafe_base_64()

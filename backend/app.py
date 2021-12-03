@@ -395,7 +395,7 @@ def get_recipe_by_id(recipe_id):
     return success_response(recipe.serialize())
 
 
-@app.route("/api/recipes/filter/")
+@app.route("/api/recipes/filter/", methods=["POST"])
 def get_recipes_by_filter():
     """
     Description: Gets all recipes matching a certain criteria described by
@@ -417,7 +417,7 @@ def get_recipes_by_filter():
         }
         "created": {
             "before": <integer>, <- unix time (time since 1970 epoch)
-            "after": <integer>, <- unix time (time since 1970 epoch)
+            "after": <integer> <- unix time (time since 1970 epoch)
         }
     }
     Return: {
@@ -648,7 +648,7 @@ def post_new_recipe_for_user(user_id: int):
             ],
             "instructions": [
                 {
-                    "step_number": <integer>
+                    "step_number": <integer>,
                     "step": <string>
                 },
                 ...
