@@ -13,10 +13,10 @@ protocol UpdateIngredientsDelegate: class {
     func updateName(newString: String)
 }
 
+var hasUserID = false
 
 class ViewController: UIViewController {
     
-//    var homeView = HomeViewController()
     
     private let button: UIButton = {
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 200, height: 52))
@@ -26,18 +26,49 @@ class ViewController: UIViewController {
         button.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1).cgColor
         button.backgroundColor = .white
         button.setTitleColor(.black, for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
         return button
+    }()
+    
+    private let firstImage : UIImageView = {
+        let firstImage = UIImageView(image: UIImage(named: "screen1"))
+//        firstImage.
+        firstImage.sizeToFit()
+        firstImage.translatesAutoresizingMaskIntoConstraints = false
+        return firstImage
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+//        view.back
         view.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
-        title = "Welcome to Cornell Cookbook"
+//        title = "Welcome to Cornell Cookbook"
         //button
         button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
+//        view.addSubview(firstImage)
         
         view.addSubview(button)
+        onboarding()
+        setUpConstraints()
     }
+    
+    func onboarding(){
+        if hasUserID {
+            view.addSubview(firstImage)
+        } else {
+            view.addSubview(firstImage)
+        }
+    }
+    
+    func setUpConstraints (){
+        NSLayoutConstraint.activate([
+            firstImage.topAnchor.constraint(equalTo: view.topAnchor),
+            firstImage.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            firstImage.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            firstImage.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         button.center = view.center
@@ -45,32 +76,11 @@ class ViewController: UIViewController {
     
     @objc func didTapButton() {
         button.backgroundColor = UIColor(red: 0.162, green: 0.162, blue: 0.162, alpha: 1)
-        let tabBarVC = UITabBarController()
+//        let tabBarVC = UITabBarController()
         let vc3 = SearchViewController()
-        let vc1 = HomeViewController()
-        let vc2 = ProfileViewController()
-        
-//        vc3.title = "Search"
-//        vc1.title = "Home"
-//        vc2.title = "Profile"
-        
-        tabBarVC.setViewControllers([vc3, vc1, vc2], animated: false)
-        
-        guard let items1 = tabBarVC.tabBar.items else {
-            return
-        }
-        
-        let images = ["search", "home","profile" ]
-
-        for x in 0..<items1.count {
-            items1[x].image = UIImage(named: images[x])
-        }
-        
-        tabBarVC.tabBar.barTintColor = UIColor(red: 0.267, green: 0.259, blue: 0.259, alpha: 1)
-//       wrong color fix later
-        tabBarVC.modalPresentationStyle = .fullScreen
-        present(tabBarVC, animated: true)
-        tabBarVC.selectedIndex = 1
+        let navVC = UINavigationController(rootViewController: vc3)
+        navVC.modalPresentationStyle = .fullScreen
+        present(navVC, animated: true)
     }
 
 }
@@ -86,12 +96,33 @@ class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
+        view.backgroundColor = .white
 //        title = "Profile"
-        titleLabel.text = "Karen C"
+        titleLabel.text = "Karen's Cookbook'"
         titleLabel.font = UIFont(name: "Galvji-Bold", size: 30)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
+        
+        yourRecipes.setTitle("Your Recipes", for: .normal)
+        yourRecipes.layer.cornerRadius = 22.5
+        yourRecipes.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
+        yourRecipes.isSelected = true
+        yourRecipes.setTitleColor(UIColor(red: 0.692, green: 0.084, blue: 0.157, alpha: 1), for: .normal)
+        yourRecipes.layer.borderWidth = 2
+        yourRecipes.titleLabel?.font = UIFont(name: "Galvji", size: 14.4)
+        yourRecipes.layer.borderColor = UIColor(red: 0.692, green: 0.084, blue: 0.157, alpha: 1).cgColor
+        yourRecipes.translatesAutoresizingMaskIntoConstraints = false
+        yourRecipes.addTarget(self, action: #selector(showYour), for: .touchUpInside)
+        
+        savedRecipes.setTitle("Saved Recipes", for: .normal)
+        savedRecipes.layer.cornerRadius = 22.5
+        savedRecipes.setTitleColor(.black, for: .normal)
+        savedRecipes.titleLabel?.font = UIFont(name: "Galvji", size: 14.4)
+        savedRecipes.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
+        
+        savedRecipes.isSelected = false
+        savedRecipes.translatesAutoresizingMaskIntoConstraints = false
+        savedRecipes.addTarget(self, action: #selector(showSaved), for: .touchUpInside)
         
         filter.setTitle("Filter", for: .normal)
         filter.setTitleColor(.black, for: .normal)
@@ -109,6 +140,10 @@ class ProfileViewController: UIViewController {
         
         view.addSubview(filter)
         view.addSubview(titleLabel)
+        view.addSubview(newRecipeButton)
+        
+        view.addSubview(savedRecipes)
+        view.addSubview(yourRecipes)
         setupConstraints()
     }
     
@@ -118,8 +153,44 @@ class ProfileViewController: UIViewController {
     }
     
     @objc func newRecipe() {
+        let vc = NewViewController()
+        vc.modalPresentationStyle = .fullScreen
+        navigationController?.pushViewController(vc, animated: true)
+//        present(vc, animated: true)
+        
+//        let vc = PhotoPopUp()
+//        navigationController?.pushViewController(vc, animated: true)
+        
 //        let pop = FilterPopUp()
 //        view.addSubview(pop)
+    }
+    
+    @objc func showYour() {
+        yourRecipes.setTitleColor(UIColor(red: 0.692, green: 0.084, blue: 0.157, alpha: 1), for: .normal)
+        savedRecipes.setTitleColor(.black, for: .normal)
+        yourRecipes.layer.borderWidth = 2
+        savedRecipes.layer.borderWidth = 0
+        yourRecipes.layer.borderColor = UIColor(red: 0.692, green: 0.084, blue: 0.157, alpha: 1).cgColor
+        let pop = FilterPopUp()
+        
+        let vc = HomeViewController()
+        present(vc, animated: true)
+        
+        view.addSubview(pop)
+    }
+    
+    @objc func showSaved() {
+        savedRecipes.setTitleColor(UIColor(red: 0.692, green: 0.084, blue: 0.157, alpha: 1), for: .normal)
+        yourRecipes.setTitleColor(.black, for: .normal)
+        savedRecipes.layer.borderWidth = 2
+        savedRecipes.layer.borderColor = UIColor(red: 0.692, green: 0.084, blue: 0.157, alpha: 1).cgColor
+        yourRecipes.layer.borderWidth = 0
+        
+        let vc = HomeViewController()
+        present(vc, animated: true)
+        
+        let pop = FilterPopUp()
+        view.addSubview(pop)
     }
     
     func setupConstraints() {
@@ -137,6 +208,27 @@ class ProfileViewController: UIViewController {
             filter.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 296),
 
             filter.topAnchor.constraint(equalTo: view.topAnchor, constant: 93)
+        ])
+        
+        NSLayoutConstraint.activate([
+            savedRecipes.widthAnchor.constraint(equalToConstant: 119.53),
+            savedRecipes.heightAnchor.constraint(equalToConstant: 33),
+            savedRecipes.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 193),
+            savedRecipes.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 1)
+        ])
+        
+        NSLayoutConstraint.activate([
+            yourRecipes.widthAnchor.constraint(equalToConstant: 108),
+            yourRecipes.heightAnchor.constraint(equalToConstant: 33),
+            yourRecipes.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 57),
+            yourRecipes.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 1)
+        ])
+        
+        NSLayoutConstraint.activate([
+            newRecipeButton.widthAnchor.constraint(equalToConstant: 85),
+            newRecipeButton.heightAnchor.constraint(equalToConstant: 85),
+            newRecipeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 145),
+            newRecipeButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 730)
         ])
         
     }
@@ -175,6 +267,13 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
     let searchControl = UISearchBar()
     let titleLabel = UILabel()
     let filter = UIButton()
+    let profile = UIButton()
+    let logo = UIImageView()
+    
+
+//    var recipeData: [Recipie] = []
+//    var instructionData: [Instructions]
+//    var ingredientsData: [Ingredients]
     
     let popularLabel = UILabel()
     let featureLabel = UILabel()
@@ -183,9 +282,17 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
     var featureCollectionView : UICollectionView!
     
     var featureSection = ["Featured"]
+    
+//    func sortData() {
+//        postData.sort { (leftPost, rightPost) -> Bool in
+//            return leftPost.id > rightPost.id
+//        }
+//    }
 //    getAllRecipes()
     var featureRecipes : [[Recipie]] =
-        [[Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)]]
+        [
+         [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2),
+          Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)]]
         
     let recipieCellReuseIdentifier = "recipieCellReuseIdentifier"
 //    let headerReuseIdentifier = "headerReuseIdentifer"
@@ -195,7 +302,11 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
+        view.backgroundColor = .white
+        
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.isTranslucent = true
         
         searchControl.searchBarStyle = UISearchBar.Style.default
         searchControl.placeholder = " Search..."
@@ -204,6 +315,7 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
         searchControl.isTranslucent = true
         searchControl.backgroundImage = UIImage()
         searchControl.delegate = self
+//        searchControl.sele
         searchControl.translatesAutoresizingMaskIntoConstraints = false
         
         titleLabel.text = "Discover"
@@ -222,11 +334,17 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
         recentlyLabel.font = UIFont(name: "Galvji", size: 20)
         recentlyLabel.translatesAutoresizingMaskIntoConstraints = false
         
+        logo.image = UIImage(named: "logo")
+        logo.translatesAutoresizingMaskIntoConstraints = false
         
         filter.setTitle("Filter", for: .normal)
         filter.setTitleColor(.black, for: .normal)
         filter.translatesAutoresizingMaskIntoConstraints = false
         filter.addTarget(self, action: #selector(showFilters), for: .touchUpInside)
+        
+        profile.setImage(UIImage(named: "profile"), for: .normal)
+        profile.translatesAutoresizingMaskIntoConstraints = false
+        profile.addTarget(self, action: #selector(showProfile), for: .touchUpInside)
         
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = cellPadding
@@ -252,6 +370,8 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
         view.addSubview(searchControl)
         view.addSubview(titleLabel)
         view.addSubview(filter)
+        view.addSubview(logo)
+        view.addSubview(profile)
         
         view.addSubview(popularLabel)
         view.addSubview(featureLabel)
@@ -262,6 +382,15 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
     @objc func showFilters() {
         let pop = FilterPopUp()
         view.addSubview(pop)
+    }
+    
+    @objc func showProfile() {
+        let rootVC = ProfileViewController()
+//        rootVC.title = "Profile Name "
+//        let navVC = UINavigationController(rootViewController: rootVC)
+//        navVC.modalPresentationStyle = .fullScreen
+//        present(navVC, animated: true)
+        navigationController?.pushViewController(rootVC, animated: true)
     }
     
     func setupConstraints() {
@@ -275,39 +404,37 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
         
         NSLayoutConstraint.activate([
             filter.widthAnchor.constraint(equalToConstant: 40),
-
             filter.heightAnchor.constraint(equalToConstant: 23),
             filter.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 296),
-
             filter.topAnchor.constraint(equalTo: view.topAnchor, constant: 93)
         ])
         
         NSLayoutConstraint.activate([
+            profile.widthAnchor.constraint(equalToConstant: 40),
+            profile.heightAnchor.constraint(equalToConstant: 23),
+            profile.leadingAnchor.constraint(equalTo: filter.trailingAnchor, constant: 5),
+            profile.centerYAnchor.constraint(equalTo: filter.centerYAnchor)
+//            profile.topAnchor.constraint(equalTo: view.topAnchor, constant: 93)
+        ])
+        
+        NSLayoutConstraint.activate([
             popularLabel.widthAnchor.constraint(equalToConstant: 101),
-
             popularLabel.heightAnchor.constraint(equalToConstant: 45),
-
             popularLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 13),
-
             popularLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 164)
         ])
         
         NSLayoutConstraint.activate([
             featureLabel.widthAnchor.constraint(equalToConstant: 160),
-
             featureLabel.heightAnchor.constraint(equalToConstant: 29),
             featureLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 9),
-
             featureLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 406)
         ])
         
         NSLayoutConstraint.activate([
             recentlyLabel.widthAnchor.constraint(equalToConstant: 160),
-
             recentlyLabel.heightAnchor.constraint(equalToConstant: 29),
-
             recentlyLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 7),
-
             recentlyLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 647)
         ])
         
@@ -320,12 +447,18 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
             searchControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -7)
         ])
         
+        NSLayoutConstraint.activate([
+            logo.widthAnchor.constraint(equalToConstant: 100),
+            logo.heightAnchor.constraint(equalToConstant: 63),
+            logo.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 7),
+            logo.topAnchor.constraint(equalTo: view.topAnchor, constant: 20)
+        ])
+        
         let collectionViewPadding: CGFloat = 12
         NSLayoutConstraint.activate([
-            featureCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 164),
-            featureCollectionView.heightAnchor.constraint(equalToConstant: 217),
+            featureCollectionView.topAnchor.constraint(equalTo: popularLabel.bottomAnchor),
+            featureCollectionView.bottomAnchor.constraint(equalTo: featureLabel.topAnchor),
             featureCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: collectionViewPadding),
-//            featureCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -collectionViewPadding),
             featureCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -collectionViewPadding)
         ])
     }
@@ -355,7 +488,8 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
 //    }
     
     func searchBarSearchButtonClicked(_searchBar: UISearchBar) {
-        
+        let vc = HomeViewController()
+        present(vc, animated: true)
     }
     
     func searchBarTextDidBeginEditing(_searchBar: UISearchBar) {
@@ -370,23 +504,21 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: 115, height: 115)
-    }
-
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: collectionView.frame.width, height: 200)
+        return CGSize(width: collectionView.frame.width / 2.5, height: collectionView.frame.height)
     }
 
     
-    //present view controller
-//    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        featureRecipes[indexPath.section][indexPath.item].isSelected.toggle()
-//        if featureRecipes[indexPath.section][indexPath.item].isSelected {
-//            let vc = PresentViewController(delegate: self, placeholderName: featureRecipes[indexPath.section][indexPath.item].name, placeholderIngredients: featureRecipes[indexPath.section][indexPath.item].ingredients, placeholderInstructions: featureRecipes[indexPath.section][indexPath.item].instructions)
+//    present view controller
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        featureRecipes[indexPath.section][indexPath.item].isSelected.toggle()
+        if featureRecipes[indexPath.section][indexPath.item].isSelected {
+            let vc = PresentViewController(delegate: self, placeholderName: featureRecipes[indexPath.section][indexPath.item].name, placeholderIngredients: featureRecipes[indexPath.section][indexPath.item].ingredients, placeholderInstructions: featureRecipes[indexPath.section][indexPath.item].instructions)
+            vc.modalPresentationStyle = .fullScreen
+            navigationController?.present(vc, animated: true)
 //            self.present(vc, animated: true, completion: nil)
-//        }
-//        collectionView.reloadData()
-//    }
+        }
+        collectionView.reloadData()
+    }
     
 }
 
@@ -402,7 +534,7 @@ class HomeViewController: UIViewController, UICollectionViewDataSource, UICollec
     
     
     func updateIngredients(newString: String) {
-        recipies[1][1].ingredients = newString
+        recipies[1][1].name = newString
     }
     
     
@@ -412,11 +544,7 @@ class HomeViewController: UIViewController, UICollectionViewDataSource, UICollec
     var featureSection = ["Featured"]
     var sections = ["Breakfast", "Lunch", "Dinner", "Snack"]
     var featureRecipes : [[Recipie]] = []
-    var recipies : [[Recipie]] = [
-        [Recipie(name: "Name: Baked Oatmeal", instructions: "Instructions: Preheat the oven to 375 degrees. Grease a 9-inch square baking dish. Once the oven has finished preheating, pour the nuts onto a rimmed baking sheet.Toast for 4 to 5 minutes, until fragrant. In a medium mixing bowl, combine the oats, toasted nuts, cinnamon, baking powder, salt and nutmeg. Whisk to combine. In a smaller mixing bowl, combine the milk, maple syrup or honey, egg, half of the butter or coconut oil, and vanilla. Whisk until blended. (If you used coconut oil and it solidified in contact with the cold ingredients, briefly microwave the bowl in 30 second increments, just until the coconut oil melts again.) Reserve about ½ cup of the berries for topping the baked oatmeal, then arrange the remaining berries evenly over the bottom of the baking dish (no need to defrost frozen fruit first). Cover the fruit with the dry oat mixture, then drizzle the wet ingredients over the oats. Wiggle the baking dish to make sure the milk moves down through the oats, then gently pat down any dry oats resting on top. Scatter the remaining berries across the top. Sprinkle some raw sugar on top if you’d like some extra sweetness and crunch. Bake for 42 to 45 minutes (if using frozen berries, 45 to 50 minutes), until the top is nice and golden. Remove your baked oatmeal from the oven and let it cool for a few minutes. Drizzle the remaining melted butter on the top before serving. Serve as-is or with toppings of your choice. I prefer this baked oatmeal served warm, but it is also good at room temperature or chilled. This oatmeal keeps well in the refrigerator, covered, for 4 to 5 days. If desired, simply reheat individual portions in the microwave before serving.", ingredients: "Ingredients: oats, milk, butter, sugar", cuisine: "Breakfast"),Recipie(name: "Baked Oatmeal", instructions: "Bake at 350 in oven 20 minutes ..", ingredients: "oats, milk, butter, sugar", cuisine: "Breakfast"), Recipie(name: "Baked Oatmeal", instructions: "Bake at 350 in oven 20 minutes ..", ingredients: "oats, milk, butter, sugar", cuisine: "Breakfast")  ],
-        [ Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine:"Lunch"), Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine:"Lunch")],
-        [ Recipie(name: "Lobster Tail", instructions: "Cook until medium brown", ingredients: "lobster, butter, pan, pot, eggs fun ...", cuisine: "Dinner"), Recipie(name: "Lobster Tail", instructions: "Cook until medium brown", ingredients: "lobster, butter, pan, pot, eggs fun ...", cuisine: "Dinner"), Recipie(name: "Lobster Tail", instructions: "Cook until medium brown", ingredients: "lobster, butter, pan, pot, eggs fun ...", cuisine: "Dinner")],
-        [ Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine: "Snack"), Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine: "Snack"), Recipie(name: "Fillet Chicken", instructions: "ajfhjerhuerhfjkbf gmdbfhjgberjgeq", ingredients: "jfkaglherguhg", cuisine: "Snack")]]
+    var recipies : [[Recipie]] = [[Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(name: "eggs", amount: 3, unit: "Slices"), Ingredients(name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(stepNumber: 1, step: "one"), Instructions(stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)]]
 
     let recipieCellReuseIdentifier = "recipieCellReuseIdentifier"
     let headerReuseIdentifier = "headerReuseIdentifer"
@@ -511,14 +639,15 @@ class HomeViewController: UIViewController, UICollectionViewDataSource, UICollec
             return CGSize(width: collectionView.frame.width, height: 50)
         }
 
-        func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-            recipies[indexPath.section][indexPath.item].isSelected.toggle()
-            if recipies[indexPath.section][indexPath.item].isSelected {
-                let vc = PresentViewController(delegate: self, placeholderName: recipies[indexPath.section][indexPath.item].name, placeholderIngredients: recipies[indexPath.section][indexPath.item].ingredients, placeholderInstructions: recipies[indexPath.section][indexPath.item].instructions)
-                self.present(vc, animated: true, completion: nil)
-            }
-            collectionView.reloadData()
-        }
+    //present view controller reformat
+//        func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+//            recipies[indexPath.section][indexPath.item].isSelected.toggle()
+//            if recipies[indexPath.section][indexPath.item].isSelected {
+//                let vc = PresentViewController(delegate: self, placeholderName: recipies[indexPath.section][indexPath.item].name, placeholderIngredients: recipies[indexPath.section][indexPath.item].ingredients, placeholderInstructions: recipies[indexPath.section][indexPath.item].instructions)
+//                self.present(vc, animated: true, completion: nil)
+//            }
+//            collectionView.reloadData()
+//        }
 
 //    }
 }
@@ -538,15 +667,24 @@ class PresentViewController: UIViewController {
     private var button = UIButton()
     private var label = UILabel()
     private var ingredientsField = UITextField()
-//    private var nameField = UITextField()
+    
+    private var foodImage = UIImageView()
+    
+    private var diffcultyTag = UILabel()
+    private var timeTag = UILabel()
+    private var cuisineTag = UILabel()
+    private var ingredientsButton = UIButton()
+    private var methodLabel = UIButton()
+
+    //    private var nameField = UITextField()
     private var instructionsField = UITextView()
 
-    var placeholderIngredients: String?
+    var placeholderIngredients: [Ingredients]?
     var placeholderName: String?
-    var placeholderInstructions: String?
+    var placeholderInstructions: [Instructions]?
 
     // TODO 10: initialize placeholder text
-    init(delegate: UpdateIngredientsDelegate?, placeholderName: String, placeholderIngredients: String, placeholderInstructions: String) {
+    init(delegate: UpdateIngredientsDelegate?, placeholderName: String, placeholderIngredients: [Ingredients], placeholderInstructions: [Instructions]) {
         self.delegate = delegate
         self.placeholderName = placeholderName
         self.placeholderIngredients = placeholderIngredients
@@ -561,7 +699,7 @@ class PresentViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .lightGray
+        view.backgroundColor = .white
 
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = placeholderName
@@ -569,64 +707,174 @@ class PresentViewController: UIViewController {
         label.textColor = .black
         view.addSubview(label)
 
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Done", for: .normal)
-        button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = UIColor(red: 240/255, green: 240/255, blue: 240/255, alpha: 1)
-        button.layer.cornerRadius = 4
+        
+        button.setImage(UIImage(named: "exit"), for: .normal)
+//        button.setTitle("Done", for: .normal)
+//        button.setTitleColor(.black, for: .normal)
+//        button.backgroundColor = UIColor(red: 240/255, green: 240/255, blue: 240/255, alpha: 1)
+//        button.layer.cornerRadius = 4
         button.addTarget(self, action: #selector(dismissViewController), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(button)
 
         ingredientsField.translatesAutoresizingMaskIntoConstraints = false
         ingredientsField.font = UIFont.systemFont(ofSize: 18)
         // TODO 10: set placeholder text
-        ingredientsField.text = placeholderIngredients
+        ingredientsField.text = getIngredients(list: placeholderIngredients!)
         ingredientsField.borderStyle = .roundedRect
+        
         ingredientsField.textAlignment = .center
         view.addSubview(ingredientsField)
         
         instructionsField.translatesAutoresizingMaskIntoConstraints = false
         instructionsField.font = UIFont.systemFont(ofSize: 18)
         // TODO 10: set placeholder text
-        instructionsField.text = placeholderInstructions
+        instructionsField.text = "instruction Placeholder"
         instructionsField.layer.cornerRadius = 4
 //        instructionsField.layer
         instructionsField.textAlignment = .center
         view.addSubview(instructionsField)
         
-//        nameField.translatesAutoresizingMaskIntoConstraints = false
-//        nameField.font = UIFont.systemFont(ofSize: 18)
-//        nameField.text = placeholderName
-//        nameField.borderStyle = .roundedRect
-//        nameField.textAlignment = .center
-//        view.addSubview(nameField)
-
-        setUpConstraints()
-    }
-
-    func setUpConstraints() {
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
-            label.heightAnchor.constraint(equalToConstant: 32)
-//            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-//            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-        ])
+        foodImage.image = UIImage(named: "Avatar 1")
+        foodImage.translatesAutoresizingMaskIntoConstraints = false
+        
+        diffcultyTag.text = "Beginner"
+        diffcultyTag.textAlignment = .center
+        diffcultyTag.font = UIFont(name: "Galvji", size: 12)
+        diffcultyTag.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
+        diffcultyTag.layer.cornerRadius = 13.5
+        diffcultyTag.translatesAutoresizingMaskIntoConstraints = false
+        
+        timeTag.text = "10 min"
+        timeTag.textAlignment = .center
+        timeTag.font = UIFont(name: "Galvji", size: 12)
+        timeTag.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
+        timeTag.layer.cornerRadius = 13.5
+        timeTag.translatesAutoresizingMaskIntoConstraints = false
+        
+        cuisineTag.text = "Asian"
+        cuisineTag.textAlignment = .center
+        cuisineTag.font = UIFont(name: "Galvji", size: 12)
+        cuisineTag.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
+        cuisineTag.layer.cornerRadius = 13.5
+        cuisineTag.translatesAutoresizingMaskIntoConstraints = false
+        
+        ingredientsButton.setImage(UIImage(named: "ingredient"), for: .normal)
+        ingredientsButton.addTarget(self, action: #selector(ingredientsTap), for: .touchUpInside)
+        ingredientsButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        methodLabel.setImage(UIImage(named: "methodnot"), for: .normal)
+        methodLabel.addTarget(self, action: #selector(methodTap), for: .touchUpInside)
+        methodLabel.translatesAutoresizingMaskIntoConstraints = false
 
         
-//        NSLayoutConstraint.activate([
-//            nameField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-//            nameField.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-//            nameField.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24),
-//            nameField.heightAnchor.constraint(equalToConstant: 32)
-//        ])
+        view.addSubview(foodImage)
+        view.addSubview(diffcultyTag)
+        view.addSubview(timeTag)
+        view.addSubview(cuisineTag)
+        
+        view.addSubview(ingredientsButton)
+        view.addSubview(methodLabel)
+        
+        
+        setUpConstraints()
+    }
+    
+    @objc func ingredientsTap () {
+        if ingredientsButton.currentImage == UIImage(named: "ingredient") {
+            ingredientsButton.setImage(UIImage(named: "ingredientnot"), for: .normal)
+            methodLabel.setImage(UIImage(named: "method"), for: .normal)
+        } else {
+            methodLabel.setImage(UIImage(named: "methodnot"), for: .normal)
+            ingredientsButton.setImage(UIImage(named: "ingredient"), for: .normal)
+            let vc = IngredientController()
+            view.addSubview(vc)
+            
+//            present(vc, animated: true)
+//            navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+    
+    @objc func methodTap () {
+        if methodLabel.currentImage == UIImage(named: "method") {
+            ingredientsButton.setImage(UIImage(named: "ingredient"), for: .normal)
+            methodLabel.setImage(UIImage(named: "methodnot"), for: .normal)
+            let vc = IngredientController()
+            view.addSubview(vc)
+//            present(vc, animated: true)
+//            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            methodLabel.setImage(UIImage(named: "method"), for: .normal)
+            ingredientsButton.setImage(UIImage(named: "ingredientnot"), for: .normal)
+        }
+    }
+
+    func getIngredients(list: [Ingredients]) -> String {
+        var strings = ""
+        for ingredient in list {
+            strings.append(ingredient.name)
+//            strings.append(ingredient.amount)
+        }
+        return strings
+    }
+    
+    func setUpConstraints() {
+        
+        NSLayoutConstraint.activate([
+            foodImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            foodImage.topAnchor.constraint(equalTo: view.topAnchor),
+            foodImage.heightAnchor.constraint(equalToConstant: 379),
+            foodImage.widthAnchor.constraint(equalToConstant: 379),
+        ])
 
         NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.topAnchor.constraint(equalTo: foodImage.bottomAnchor, constant: 7),
+            label.heightAnchor.constraint(equalToConstant: 32)
+        ])
+        
+        NSLayoutConstraint.activate([
+            diffcultyTag.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 50),
+            diffcultyTag.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 5),
+            diffcultyTag.widthAnchor.constraint(equalToConstant: 84),
+            diffcultyTag.heightAnchor.constraint(equalToConstant: 22)
+        ])
+        
+        NSLayoutConstraint.activate([
+            timeTag.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            timeTag.topAnchor.constraint(equalTo: diffcultyTag.topAnchor),
+//            timeTag.heightAnchor.constraint(equalToConstant: 32),
+            timeTag.widthAnchor.constraint(equalToConstant: 84),
+            timeTag.heightAnchor.constraint(equalToConstant: 22)
+        ])
+        
+        NSLayoutConstraint.activate([
+            cuisineTag.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
+            cuisineTag.topAnchor.constraint(equalTo: diffcultyTag.topAnchor),
+            cuisineTag.widthAnchor.constraint(equalToConstant: 84),
+            cuisineTag
+                .heightAnchor.constraint(equalToConstant: 22)
+        ])
+
+        NSLayoutConstraint.activate([
+            ingredientsButton.topAnchor.constraint(equalTo: cuisineTag.bottomAnchor, constant: 20),
+            ingredientsButton.widthAnchor.constraint(equalToConstant: 142),
+            ingredientsButton.heightAnchor.constraint(equalToConstant: 42),
+            ingredientsButton.leadingAnchor.constraint(equalTo: ingredientsField.leadingAnchor)
+        ])
+        
+        NSLayoutConstraint.activate([
+            methodLabel.topAnchor.constraint(equalTo: cuisineTag.bottomAnchor, constant: 20),
+            methodLabel.widthAnchor.constraint(equalToConstant: 142),
+            methodLabel.heightAnchor.constraint(equalToConstant: 42),
+            methodLabel.leadingAnchor.constraint(equalTo: ingredientsButton.trailingAnchor, constant: 24)
+        ])
+        
+        
+        NSLayoutConstraint.activate([
             ingredientsField.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 20),
-//            ingredientsField.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
             ingredientsField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             ingredientsField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-//            ingredientsField.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24),
             ingredientsField.heightAnchor.constraint(equalToConstant: 32)
         ])
         
@@ -635,19 +883,16 @@ class PresentViewController: UIViewController {
             instructionsField.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -60),
             instructionsField.leadingAnchor.constraint(equalTo: ingredientsField.leadingAnchor),
             instructionsField.trailingAnchor.constraint(equalTo: ingredientsField.trailingAnchor)
-//            instructionsField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-//            instructionsField.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-//            instructionsField.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -24),
-//            instructionsField.heightAnchor.constraint(equalToConstant: 32)
         ])
+        
         NSLayoutConstraint.activate([
-            button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            button.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
-            button.leadingAnchor.constraint(equalTo: ingredientsField.leadingAnchor),
-            button.trailingAnchor.constraint(equalTo: ingredientsField.trailingAnchor)
-//            button.widthAnchor.constraint(equalToConstant: 120),
-//            button.heightAnchor.constraint(equalToConstant: 32)
+            button.topAnchor.constraint(equalTo: view.topAnchor, constant: -40),
+            button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 30),
+            button.widthAnchor.constraint(equalToConstant: 17),
+            button.heightAnchor.constraint(equalToConstant: 17)
         ])
+        
+        
         
     }
 
@@ -660,3 +905,249 @@ class PresentViewController: UIViewController {
 
 }
 
+class NewViewController: UIViewController {
+    
+    private var name = UILabel()
+    private var ingredients = UILabel()
+    private var methods = UILabel()
+    private var tags = UILabel()
+    private var photo = UILabel()
+    private var photoLabel = UITextView()
+    
+    private var ingredientButton = UIButton()
+    private var stepButton = UIButton()
+    private var photoButton = UIButton()
+    
+    private var nameField = UITextField()
+//    private var methodField = UITextField()
+//    private var ingredientNameField = TextField()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        title = "Create New Recipe"
+        view.backgroundColor = .white
+        
+        name.text = "Name"
+        name.font = UIFont(name: "Galvji", size: 20)
+        name.translatesAutoresizingMaskIntoConstraints = false
+        
+        ingredients.text = "Ingredients"
+        ingredients.font = UIFont(name: "Galvji", size: 20)
+        ingredients.translatesAutoresizingMaskIntoConstraints = false
+        
+        methods.text = "Method"
+        methods.font = UIFont(name: "Galvji", size: 20)
+        methods.translatesAutoresizingMaskIntoConstraints = false
+        
+        tags.text = "Tags"
+        tags.font = UIFont(name: "Galvji", size: 20)
+        tags.translatesAutoresizingMaskIntoConstraints = false
+        
+        photo.text = "Add Photo"
+        photo.font = UIFont(name: "Galvji", size: 20)
+        photo.translatesAutoresizingMaskIntoConstraints = false
+        
+        photoLabel.text = "Choose from one of our preset photos"
+        photoLabel.font = UIFont(name: "Galvji", size: 12)
+        photoLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        nameField.placeholder = "Name your culinary masterpiece"
+        nameField.font = UIFont(name: "Galvji", size: 12)
+        nameField.translatesAutoresizingMaskIntoConstraints = false
+        
+        ingredientButton.setImage(UIImage(named: "addIng"), for: .normal)
+        ingredientButton.addTarget(self, action: #selector(addIngredient), for: .touchUpInside)
+        ingredientButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        stepButton.setImage(UIImage(named: "addStep"), for: .normal)
+        stepButton.addTarget(self, action: #selector(addStep), for: .touchUpInside)
+        stepButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        photoButton.setTitle("Choose Photo", for: .normal)
+        photoButton.setTitleColor(.black, for: .normal)
+        photoButton.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
+        photoButton.layer.cornerRadius = 18
+        photoButton.translatesAutoresizingMaskIntoConstraints = false
+        photoButton.addTarget(self, action: #selector(choosePhoto), for: .touchUpInside)
+        
+        view.addSubview(nameField)
+        view.addSubview(name)
+        view.addSubview(ingredients)
+        view.addSubview(methods)
+        view.addSubview(tags)
+        view.addSubview(photo)
+        
+        view.addSubview(stepButton)
+        view.addSubview(ingredientButton)
+        view.addSubview(photoButton)
+        view.addSubview(photoLabel)
+        
+        setUpConstraints()
+    }
+    
+    @objc func addIngredient() {
+        let pop = IngredientPopUp()
+        view.addSubview(pop)
+    }
+    
+    @objc func addStep() {
+        let pop = InstructionPopUp()
+        view.addSubview(pop)
+    }
+    
+    @objc func choosePhoto() {
+        let vc = PhotoPopUp()
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func setUpConstraints() {
+        NSLayoutConstraint.activate([
+            name.widthAnchor.constraint(equalToConstant: 67),
+            name.heightAnchor.constraint(equalToConstant: 32),
+            name.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15),
+            name.topAnchor.constraint(equalTo: view.topAnchor, constant: 131)
+        ])
+        NSLayoutConstraint.activate([
+            ingredients.widthAnchor.constraint(equalToConstant: 132),
+            ingredients.heightAnchor.constraint(equalToConstant: 32),
+            ingredients.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15),
+            ingredients.topAnchor.constraint(equalTo: view.topAnchor, constant: 203)
+        ])
+        NSLayoutConstraint.activate([
+            methods.widthAnchor.constraint(equalToConstant: 119),
+            methods.heightAnchor.constraint(equalToConstant: 32),
+            methods.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 14),
+            methods.topAnchor.constraint(equalTo: view.topAnchor, constant: 286)
+        ])
+        NSLayoutConstraint.activate([
+            tags.widthAnchor.constraint(equalToConstant: 119),
+            tags.heightAnchor.constraint(equalToConstant: 32),
+            tags.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 13),
+            tags.topAnchor.constraint(equalTo: view.topAnchor, constant: 374)
+        ])
+        NSLayoutConstraint.activate([
+            nameField.heightAnchor.constraint(equalToConstant: 32),
+            nameField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 93),
+            nameField.widthAnchor.constraint(equalToConstant: 315),
+            nameField.topAnchor.constraint(equalTo: name.topAnchor)
+        ])
+        NSLayoutConstraint.activate([
+            ingredientButton.heightAnchor.constraint(equalToConstant: 16),
+            ingredientButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30),
+            ingredientButton.widthAnchor.constraint(equalToConstant: 139),
+            ingredientButton.bottomAnchor.constraint(equalTo: methods.topAnchor, constant: -20)
+        ])
+        NSLayoutConstraint.activate([
+            stepButton.heightAnchor.constraint(equalToConstant: 16),
+            stepButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30),
+            stepButton.widthAnchor.constraint(equalToConstant: 80),
+            stepButton.bottomAnchor.constraint(equalTo: tags.topAnchor, constant: -20)
+        ])
+        
+        NSLayoutConstraint.activate([
+            photo.heightAnchor.constraint(equalToConstant: 32),
+            photo.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 13),
+            photo.widthAnchor.constraint(equalToConstant: 119),
+            photo.topAnchor.constraint(equalTo: tags.bottomAnchor, constant: 20)
+        ])
+        
+        NSLayoutConstraint.activate([
+            photoButton.heightAnchor.constraint(equalToConstant: 40),
+            photoButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            photoButton.widthAnchor.constraint(equalToConstant: 150),
+            photoButton.topAnchor.constraint(equalTo: photo.bottomAnchor, constant: 20)
+        ])
+        
+        NSLayoutConstraint.activate([
+            photoLabel.heightAnchor.constraint(equalToConstant: 40),
+            photoLabel.leadingAnchor.constraint(equalTo: photoButton.leadingAnchor),
+            photoLabel.widthAnchor.constraint(equalTo: photoButton.widthAnchor),
+            photoLabel.topAnchor.constraint(equalTo: photoButton.bottomAnchor, constant: 7)
+        ])
+        
+    }
+}
+
+
+class IngredientController: UIView, UITableViewDelegate, UITableViewDataSource {
+    var tableView = UITableView()
+    var image = UIImageView()
+
+    let reuseIdentifier = "ingredientCellReuse"
+    let cellHeight: CGFloat = 22
+    let container: UIView = {
+        let v = UIView()
+        v.translatesAutoresizingMaskIntoConstraints = false
+        v.backgroundColor = .white
+        v.layer.cornerRadius = 24
+        return v
+    }()
+
+    var ingredients: [Ingredients] = []
+    
+
+    override init (frame: CGRect) {
+        super.init(frame: frame)
+        self.frame = UIScreen.main.bounds
+//        self.backgroundColor = .white
+        
+//        view.frame = CGRect(x: 1, y: 2, width: 3, height: 5)
+        
+        let ingredient1 = Ingredients(name: "Beans", amount: 2, unit: "String")
+        let ingredient2 = Ingredients(name: "Beans", amount: 2, unit: "String")
+        let ingredient3 = Ingredients(name: "Beans", amount: 2, unit: "String")
+        let ingredient4 = Ingredients(name: "Beans", amount: 2, unit: "String")
+        let ingredient5 = Ingredients(name: "Beans", amount: 2, unit: "String")
+        let ingredient6 = Ingredients(name: "Beans", amount: 2, unit: "String")
+        
+        
+        ingredients = [ingredient1, ingredient2, ingredient3, ingredient4,ingredient5, ingredient6,]
+
+        // Initialize tableView
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(IngredientTableViewCell.self, forCellReuseIdentifier: reuseIdentifier)
+        
+        self.addSubview(container)
+        self.addSubview(tableView)
+
+        
+        container.heightAnchor.constraint(equalToConstant: 304).isActive = true
+        container.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+        container.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+        container.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        
+        
+        NSLayoutConstraint.activate([
+            tableView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            tableView.topAnchor.constraint(equalTo: container.safeAreaLayoutGuide.topAnchor),
+            tableView.bottomAnchor.constraint(equalTo: container.safeAreaLayoutGuide.bottomAnchor)
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return ingredients.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath) as? IngredientTableViewCell {
+            let ingredients = ingredients[indexPath.row]
+            cell.configure(ingredient: ingredients)
+            cell.selectionStyle = .none
+            return cell
+        } else {
+            return UITableViewCell()
+        }
+    }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 21
+    }
+
+}

@@ -18,6 +18,10 @@ class Ingredients: Codable {
         self.amount = amount
         self.unit = unit
     }
+    
+//    func getName (){
+//        return self.name
+//    }
 }
 
 

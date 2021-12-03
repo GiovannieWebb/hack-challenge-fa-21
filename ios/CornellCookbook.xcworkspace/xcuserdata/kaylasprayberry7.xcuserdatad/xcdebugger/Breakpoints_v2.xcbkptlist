@@ -117,16 +117,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "2344ED53-0AFE-488A-8D1A-E2D14DF4676B"
-            shouldBeEnabled = "Yes"
+            uuid = "1D2A0719-484B-4C70-BF0E-41CAFA2C84F7"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "CornellCookbook/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "156"
-            endingLineNumber = "156"
-            landmarkName = "SearchViewController"
+            startingLineNumber = "642"
+            endingLineNumber = "642"
+            landmarkName = "HomeViewController"
             landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>

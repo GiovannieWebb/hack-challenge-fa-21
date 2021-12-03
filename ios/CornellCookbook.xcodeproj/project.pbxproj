@@ -24,6 +24,11 @@
 		506A0CFF27585AF4008DF94D /* Ingredients.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506A0CFE27585AF3008DF94D /* Ingredients.swift */; };
 		506A0D0127585B11008DF94D /* Instructions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506A0D0027585B11008DF94D /* Instructions.swift */; };
 		506A0D0327585B3C008DF94D /* Comments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506A0D0227585B3C008DF94D /* Comments.swift */; };
+		506A0D052758D084008DF94D /* IngredientPopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506A0D042758D083008DF94D /* IngredientPopUp.swift */; };
+		506A0D072758D09A008DF94D /* InstructionPopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506A0D062758D09A008DF94D /* InstructionPopUp.swift */; };
+		506A0D0927596074008DF94D /* PhotoPopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506A0D0827596073008DF94D /* PhotoPopUp.swift */; };
+		506A0D0B275961B6008DF94D /* PhotoCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506A0D0A275961B6008DF94D /* PhotoCollectionViewCell.swift */; };
+		506A0D0D2759BD40008DF94D /* IngredientTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506A0D0C2759BD40008DF94D /* IngredientTableViewCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +51,11 @@
 		506A0CFE27585AF3008DF94D /* Ingredients.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredients.swift; sourceTree = "<group>"; };
 		506A0D0027585B11008DF94D /* Instructions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Instructions.swift; sourceTree = "<group>"; };
 		506A0D0227585B3C008DF94D /* Comments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Comments.swift; sourceTree = "<group>"; };
+		506A0D042758D083008DF94D /* IngredientPopUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientPopUp.swift; sourceTree = "<group>"; };
+		506A0D062758D09A008DF94D /* InstructionPopUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstructionPopUp.swift; sourceTree = "<group>"; };
+		506A0D0827596073008DF94D /* PhotoPopUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoPopUp.swift; sourceTree = "<group>"; };
+		506A0D0A275961B6008DF94D /* PhotoCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCollectionViewCell.swift; sourceTree = "<group>"; };
+		506A0D0C2759BD40008DF94D /* IngredientTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientTableViewCell.swift; sourceTree = "<group>"; };
 		669363EC97B7B1306C4042E7 /* Pods_CornellCookbook.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CornellCookbook.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E1C8F9B197EDB749BB539C1 /* Pods-CornellCookbook.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CornellCookbook.debug.xcconfig"; path = "Target Support Files/Pods-CornellCookbook/Pods-CornellCookbook.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -102,8 +112,13 @@
 				506A0CEA2748D492008DF94D /* Recipie.swift */,
 				506A0CE82748D457008DF94D /* RecipeCollectionViewCell.swift */,
 				506A0CFA27584A51008DF94D /* RowCollectionViewCell.swift */,
+				506A0D0A275961B6008DF94D /* PhotoCollectionViewCell.swift */,
 				506A0CD82746ACCA008DF94D /* ViewController.swift */,
 				506A0CF627575D70008DF94D /* FilterPopUp.swift */,
+				506A0D0C2759BD40008DF94D /* IngredientTableViewCell.swift */,
+				506A0D0827596073008DF94D /* PhotoPopUp.swift */,
+				506A0D062758D09A008DF94D /* InstructionPopUp.swift */,
+				506A0D042758D083008DF94D /* IngredientPopUp.swift */,
 				506A0CDD2746ACD5008DF94D /* Assets.xcassets */,
 				506A0CDF2746ACD5008DF94D /* LaunchScreen.storyboard */,
 				506A0CE22746ACD5008DF94D /* Info.plist */,
@@ -236,13 +251,18 @@
 			files = (
 				506A0CE92748D457008DF94D /* RecipeCollectionViewCell.swift in Sources */,
 				506A0CED274A3893008DF94D /* HeaderView.swift in Sources */,
+				506A0D0927596074008DF94D /* PhotoPopUp.swift in Sources */,
 				506A0CD92746ACCA008DF94D /* ViewController.swift in Sources */,
+				506A0D052758D084008DF94D /* IngredientPopUp.swift in Sources */,
+				506A0D0B275961B6008DF94D /* PhotoCollectionViewCell.swift in Sources */,
 				506A0D0327585B3C008DF94D /* Comments.swift in Sources */,
 				506A0CF92758406C008DF94D /* SideHeaderView.swift in Sources */,
 				506A0CFF27585AF4008DF94D /* Ingredients.swift in Sources */,
+				506A0D072758D09A008DF94D /* InstructionPopUp.swift in Sources */,
 				506A0CF3275722B3008DF94D /* NetworkManager.swift in Sources */,
 				506A0CFB27584A52008DF94D /* RowCollectionViewCell.swift in Sources */,
 				506A0D0127585B11008DF94D /* Instructions.swift in Sources */,
+				506A0D0D2759BD40008DF94D /* IngredientTableViewCell.swift in Sources */,
 				506A0CD52746ACCA008DF94D /* AppDelegate.swift in Sources */,
 				506A0CEB2748D492008DF94D /* Recipie.swift in Sources */,
 				506A0CF727575D70008DF94D /* FilterPopUp.swift in Sources */,

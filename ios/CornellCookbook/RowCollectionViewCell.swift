@@ -10,32 +10,55 @@ import UIKit
 class RowCollectionViewCell: UICollectionViewCell {
     private var recipieImageView = UIImageView()
     private var recipeName = UILabel()
+    
+    private var time = UILabel()
+    private var cuisine = UILabel()
+    private var difficulty = UILabel()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-
-        contentView.layer.cornerRadius = 8
-        contentView.clipsToBounds = true
+        
+//        contentView.leadingAnchor = superview?.leadingAnchor
+//        contentView.clipsToBounds = true
 //        contentView.backgroundColor = .red
         contentView.contentMode = .left
         contentView.translatesAutoresizingMaskIntoConstraints = false
-
-        recipieImageView.contentMode = .left
         
-        recipieImageView.layer.borderColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0).cgColor
-        recipieImageView.layer.masksToBounds = true
-        recipieImageView.layer.borderWidth = 5
+        recipieImageView.layer.borderColor = UIColor(red: 0.69, green: 0.082, blue: 0.192, alpha: 1).cgColor
+//        recipieImageView.layer.masksToBounds = true
         recipieImageView.clipsToBounds = true
         recipieImageView.translatesAutoresizingMaskIntoConstraints = false
+        recipieImageView.layer.cornerRadius = 8
+        recipieImageView.layer.borderWidth = 1
         
         recipeName.text = "placeholder"
         recipeName.font = UIFont(name: "Galvji", size: 12)
         recipeName.translatesAutoresizingMaskIntoConstraints = false
         
-//        recipeName.layer.cornerRadius = 9
+        time.text = "time"
+        time.font = UIFont(name: "Galvji", size: 8)
+        time.layer.cornerRadius = 9
+        time.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
+        time.translatesAutoresizingMaskIntoConstraints = false
+        
+        cuisine.text = "cuisine"
+        cuisine.font = UIFont(name: "Galvji", size: 8)
+        cuisine.layer.cornerRadius = 9
+        cuisine.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
+        cuisine.translatesAutoresizingMaskIntoConstraints = false
+        
+        difficulty.text = "difficulty"
+        difficulty.layer.cornerRadius = 9
+        difficulty.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
+        difficulty.font = UIFont(name: "Galvji", size: 8)
+        difficulty.translatesAutoresizingMaskIntoConstraints = false
         
         contentView.addSubview(recipieImageView)
         contentView.addSubview(recipeName)
+        
+        contentView.addSubview(difficulty)
+        contentView.addSubview(cuisine)
+        contentView.addSubview(time)
 
         setupConstraints()
     }
@@ -53,18 +76,34 @@ class RowCollectionViewCell: UICollectionViewCell {
     func setupConstraints() {
         NSLayoutConstraint.activate([
             recipieImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
-//            recipieImageView.heightAnchor.constraint(equalTo: contentView.),
-            recipieImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            recipieImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            recipieImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
+            recipieImageView.heightAnchor.constraint(equalToConstant: 115),
+            recipieImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
+            recipieImageView.widthAnchor.constraint(equalToConstant: 115),
         ])
         
         NSLayoutConstraint.activate([
-            recipeName.topAnchor.constraint(equalTo: contentView.topAnchor),
-            
-//            recipieImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            recipeName.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            recipeName.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
+            recipeName.topAnchor.constraint(equalTo: recipieImageView.bottomAnchor),
+            recipeName.heightAnchor.constraint(equalToConstant: 17),
+            recipeName.centerXAnchor.constraint(equalTo: recipieImageView.centerXAnchor)
+        ])
+        NSLayoutConstraint.activate([
+            time.topAnchor.constraint(equalTo: recipeName.bottomAnchor, constant: 2),
+            time.heightAnchor.constraint(equalToConstant: 17),
+//            time.centerXAnchor.constraint(equalTo: recipieImageView.centerXAnchor),
+            time.widthAnchor.constraint(equalToConstant: 48),
+            time.leadingAnchor.constraint(equalTo: contentView.leadingAnchor)
+        ])
+        NSLayoutConstraint.activate([
+            difficulty.topAnchor.constraint(equalTo: recipeName.bottomAnchor, constant: 2),
+            difficulty.heightAnchor.constraint(equalToConstant: 17),
+            difficulty.widthAnchor.constraint(equalToConstant: 48),
+            difficulty.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -17)
+        ])
+        NSLayoutConstraint.activate([
+            cuisine.topAnchor.constraint(equalTo: time.bottomAnchor, constant: 2),
+            cuisine.heightAnchor.constraint(equalToConstant: 17),
+            cuisine.widthAnchor.constraint(equalToConstant: 48),
+            cuisine.centerXAnchor.constraint(equalTo: recipieImageView.centerXAnchor)
         ])
         
     }

@@ -27,7 +27,6 @@ struct Recipie: Codable {
     var imageName: String
     
     
-    
 //    "id": <integer>,
 //                        "user_id": <integer>,
 //                        "name": <string>,
@@ -59,12 +58,12 @@ struct Recipie: Codable {
         self.createdAt = createdAt
 //        self.ingredients = ingredients
         
-        self.imageName = "pizza"
+        self.imageName = "Avatar 1"
         self.isSelected = false
     }
     
     func getImage() -> UIImage {
-        let imageName = isSelected ? "\(imageName)invert" : imageName
+        let imageName = isSelected ? "\(imageName)" : imageName
         guard let image = UIImage(named: imageName) else { return UIImage() }
         
         return image

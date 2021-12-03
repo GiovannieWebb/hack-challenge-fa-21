@@ -8,12 +8,14 @@
 import UIKit
 
 class FilterPopUp: UIView {
-
+//    let red = UIColor(red: 0.692, green: 0.084, blue: 0.157, alpha: 1)
+    
+    var  selected = false
      let titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Filters"
-        label.textColor = .white
+        label.textColor = .black
         label.font = UIFont(name: "Galvji-Bold", size: 20)
         return label
     }()
@@ -22,7 +24,7 @@ class FilterPopUp: UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Difficulty"
-        label.textColor = .white
+        label.textColor = .black
         label.font = UIFont(name: "Galvji", size: 15)
         return label
     }()
@@ -31,7 +33,7 @@ class FilterPopUp: UIView {
        let label = UILabel()
        label.translatesAutoresizingMaskIntoConstraints = false
        label.text = "Time"
-        label.textColor = .white
+        label.textColor = .black
        label.font = UIFont(name: "Galvji", size: 15)
        return label
    }()
@@ -40,7 +42,7 @@ class FilterPopUp: UIView {
        let label = UILabel()
        label.translatesAutoresizingMaskIntoConstraints = false
        label.text = "Meal"
-        label.textColor = .white
+        label.textColor = .black
        label.font = UIFont(name: "Galvji", size: 15)
        return label
    }()
@@ -49,7 +51,7 @@ class FilterPopUp: UIView {
        let label = UILabel()
        label.translatesAutoresizingMaskIntoConstraints = false
        label.text = "Cuisine"
-        label.textColor = .white
+        label.textColor = .black
        label.font = UIFont(name: "Galvji", size: 15)
        return label
    }()
@@ -58,7 +60,7 @@ class FilterPopUp: UIView {
        let apply = UIButton()
         apply.setTitle("Apply", for: .normal)
         apply.setTitleColor(.black, for: .normal)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 18
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(applyFilters), for: .touchUpInside)
@@ -70,7 +72,7 @@ class FilterPopUp: UIView {
         let selected = false
         apply.setTitle("Beginner", for: .normal)
         apply.setTitleColor(.black, for: .normal)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
@@ -84,7 +86,7 @@ class FilterPopUp: UIView {
         apply.setTitle("Intermediate", for: .normal)
         apply.setTitleColor(.black, for: .normal)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(ifSelect), for: .touchUpInside)
@@ -97,7 +99,7 @@ class FilterPopUp: UIView {
         apply.setTitle("Expert", for: .normal)
         apply.setTitleColor(.black, for: .normal)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(ifSelect), for: .touchUpInside)
@@ -109,7 +111,7 @@ class FilterPopUp: UIView {
         apply.setTitle("<10 min", for: .normal)
         apply.setTitleColor(.black, for: .normal)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(ifSelect), for: .touchUpInside)
@@ -122,7 +124,7 @@ class FilterPopUp: UIView {
         apply.setTitle("10-20 min", for: .normal)
         apply.setTitleColor(.black, for: .normal)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(ifSelect), for: .touchUpInside)
@@ -136,7 +138,7 @@ class FilterPopUp: UIView {
         apply.setTitle("20+ min", for: .normal)
         apply.setTitleColor(.black, for: .normal)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(ifSelect), for: .touchUpInside)
@@ -149,7 +151,7 @@ class FilterPopUp: UIView {
         apply.setTitle("Breakfast", for: .normal)
         apply.setTitleColor(.black, for: .normal)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(ifSelect), for: .touchUpInside)
@@ -162,7 +164,7 @@ class FilterPopUp: UIView {
         apply.setTitle("Lunch", for: .normal)
         apply.setTitleColor(.black, for: .normal)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(ifSelect), for: .touchUpInside)
@@ -175,7 +177,7 @@ class FilterPopUp: UIView {
         apply.setTitle("Dinner", for: .normal)
         apply.setTitleColor(.black, for: .normal)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(ifSelect), for: .touchUpInside)
@@ -188,7 +190,7 @@ class FilterPopUp: UIView {
         apply.setTitle("American", for: .normal)
         apply.setTitleColor(.black, for: .normal)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(ifSelect), for: .touchUpInside)
@@ -201,7 +203,7 @@ class FilterPopUp: UIView {
         apply.setTitle("Asian", for: .normal)
         apply.setTitleColor(.black, for: .normal)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(ifSelect), for: .touchUpInside)
@@ -214,7 +216,7 @@ class FilterPopUp: UIView {
         apply.setTitle("Latin", for: .normal)
         apply.setTitleColor(.black, for: .normal)
         apply.titleLabel?.font = UIFont(name: "Galvji", size: 12)
-        apply.backgroundColor = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+        apply.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
         apply.layer.cornerRadius = 13.5
         apply.translatesAutoresizingMaskIntoConstraints = false
         apply.addTarget(self, action: #selector(ifSelect), for: .touchUpInside)
@@ -232,13 +234,26 @@ class FilterPopUp: UIView {
        return apply
    }()
     
-    @objc func applyFilters (){
+    @objc func applyFilters (button: UIButton){
+//        if selected {
+        button.backgroundColor = UIColor(red: 0.692, green: 0.084, blue: 0.157, alpha: 1)
         self.removeFromSuperview()
+//        }
+//        else {
+//            selected = false
+//        }
     }
     @objc func ifSelect(button: UIButton){
-//        if selected
-        button.backgroundColor = .black
-//        self.sele
+//        let selected = true
+        let red = UIColor(red: 0.692, green: 0.084, blue: 0.157, alpha: 1)
+        let orange = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1)
+        if button.backgroundColor != red {
+            button.backgroundColor = red
+            selected = true
+        } else {
+            button.backgroundColor = orange
+            selected = false
+        }
     }
     
     @objc func dismissView(){
@@ -249,7 +264,7 @@ class FilterPopUp: UIView {
     let container: UIView = {
         let v = UIView()
         v.translatesAutoresizingMaskIntoConstraints = false
-        v.backgroundColor = UIColor(red: 0.162, green: 0.162, blue: 0.162, alpha: 1)
+        v.backgroundColor = UIColor(red: 1, green: 0.947, blue: 0.867, alpha: 1)
         v.layer.cornerRadius = 24
         return v
     }()
@@ -440,15 +455,11 @@ class FilterPopUp: UIView {
         latinButton.heightAnchor.constraint(equalToConstant: 22).isActive = true
 
         latinButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 246).isActive = true
-
         latinButton.topAnchor.constraint(equalTo: self.topAnchor, constant: 543).isActive = true
         
         exitButton.widthAnchor.constraint(equalToConstant: 16.97).isActive = true
-
         exitButton.heightAnchor.constraint(equalToConstant: 16.97).isActive = true
-
         exitButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 307).isActive = true
-
         exitButton.topAnchor.constraint(equalTo: self.topAnchor, constant: 270).isActive = true
         
     }
