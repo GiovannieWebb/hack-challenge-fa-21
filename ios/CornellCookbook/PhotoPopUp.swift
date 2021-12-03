@@ -25,6 +25,7 @@ class PhotoPopUp: UIViewController, UICollectionViewDataSource, UICollectionView
     private var button = UIButton()
     //title
     private var label = UILabel()
+    var savedImage = UIImageView()
     
     var Av1 = UIButton()
     var Av2 = UIButton()
@@ -35,7 +36,10 @@ class PhotoPopUp: UIViewController, UICollectionViewDataSource, UICollectionView
     var Av7 = UIButton()
     var Av8 = UIButton()
     
+//    var save = UIButton()
+    
     var save = UIBarButtonItem(image: UIImage(named: "save"), style: .plain, target: self, action: #selector(savePressed))
+    
 //    save.image = UIImage(named: "save")
 //    save.target = self
 //    save.action = #selector(savePressed)
@@ -53,7 +57,7 @@ class PhotoPopUp: UIViewController, UICollectionViewDataSource, UICollectionView
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        navigationItem.rightBarButtonItem = save
         title = "Choose Photo"
         view.backgroundColor = .white
         
@@ -74,77 +78,70 @@ class PhotoPopUp: UIViewController, UICollectionViewDataSource, UICollectionView
         
         Av1.translatesAutoresizingMaskIntoConstraints = false
         Av1.layer.cornerRadius = 40
-        Av1.setImage(UIImage(named: "Avatar 1"), for: .normal)
+        Av1.setImage(UIImage(named: "Breakfast 1"), for: .normal)
         Av1.addTarget(self, action: #selector(Av1Pressed), for: .touchUpInside)
         view.addSubview(Av1)
         
         //2
         Av2.translatesAutoresizingMaskIntoConstraints = false
         Av2.layer.cornerRadius = 40
-        Av2.setImage(UIImage(named: "Avatar 2"), for: .normal)
+        Av2.setImage(UIImage(named: "Breakfast 2"), for: .normal)
         Av2.addTarget(self, action: #selector(Av2Pressed), for: .touchUpInside)
         view.addSubview(Av2)
         
         //3
         Av3.translatesAutoresizingMaskIntoConstraints = false
         Av3.layer.cornerRadius = 40
-        Av3.setImage(UIImage(named: "Avatar 3"), for: .normal)
+        Av3.setImage(UIImage(named: "Lunch 1"), for: .normal)
         Av3.addTarget(self, action: #selector(Av3Pressed), for: .touchUpInside)
         view.addSubview(Av3)
-        
+        savedImage.image = UIImage(named: "Breakfast 1")
         //4
         Av4.translatesAutoresizingMaskIntoConstraints = false
         Av4.layer.cornerRadius = 40
-        Av4.setImage(UIImage(named: "Avatar 4"), for: .normal)
+        Av4.setImage(UIImage(named: "Lunch 2"), for: .normal)
         Av4.addTarget(self, action: #selector(Av4Pressed), for: .touchUpInside)
         view.addSubview(Av4)
         
         //5
         Av5.translatesAutoresizingMaskIntoConstraints = false
         Av5.layer.cornerRadius = 40
-        Av5.setImage(UIImage(named: "Avatar 5"), for: .normal)
+        Av5.setImage(UIImage(named: "Dinner 1"), for: .normal)
         Av5.addTarget(self, action: #selector(Av5Pressed), for: .touchUpInside)
         view.addSubview(Av5)
         
         
         Av6.translatesAutoresizingMaskIntoConstraints = false
         Av6.layer.cornerRadius = 40
-        Av6.setImage(UIImage(named: "Avatar 6"), for: .normal)
+        Av6.setImage(UIImage(named: "Dinner 2"), for: .normal)
         Av6.addTarget(self, action: #selector(Av6Pressed), for: .touchUpInside)
         view.addSubview(Av6)
         
         Av7.translatesAutoresizingMaskIntoConstraints = false
         Av7.layer.cornerRadius = 40
         Av7.setImage(UIImage(named: "Avatar 8"), for: .normal)
-        Av7.addTarget(self, action: #selector(Av5Pressed), for: .touchUpInside)
+        Av7.addTarget(self, action: #selector(Av7Pressed), for: .touchUpInside)
         view.addSubview(Av7)
         
         
         Av8.translatesAutoresizingMaskIntoConstraints = false
         Av8.layer.cornerRadius = 40
         Av8.setImage(UIImage(named: "Avatar 7"), for: .normal)
-        Av8.addTarget(self, action: #selector(Av6Pressed), for: .touchUpInside)
+        Av8.addTarget(self, action: #selector(Av8Pressed), for: .touchUpInside)
         view.addSubview(Av8)
         
         
 //        save.setImage(UIImage(named: "save"), for: .normal)
 //        save.translatesAutoresizingMaskIntoConstraints = false
 //        save.addTarget(self, action: #selector(savePressed), for: .touchUpInside)
+        
+        
+        view.addSubview(photoCollectionView)
 //        view.addSubview(save)
-        
-//        view.addSubview(photoCollectionView)
-        
         setupConstraints()
     }
     
     func setupConstraints() {
-//        let collectionViewPadding: CGFloat = 512
-//        NSLayoutConstraint.activate([
-//            photoCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: collectionViewPadding),
-//            photoCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: collectionViewPadding),
-//            photoCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -collectionViewPadding),
-//            photoCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -collectionViewPadding)
-//        ])
         
         NSLayoutConstraint.activate([
             Av1.centerXAnchor.constraint(equalTo: view.leftAnchor, constant: 96.5),
@@ -198,7 +195,7 @@ class PhotoPopUp: UIViewController, UICollectionViewDataSource, UICollectionView
             Av7.widthAnchor.constraint(equalToConstant: 145),
             Av7.heightAnchor.constraint(equalToConstant: 145)
         ])
-        //av6
+
         NSLayoutConstraint.activate([
             Av8.centerXAnchor.constraint(equalTo: view.rightAnchor, constant: -96.5),
             Av8.centerYAnchor.constraint(equalTo: Av5.centerYAnchor, constant: 181),
@@ -207,9 +204,7 @@ class PhotoPopUp: UIViewController, UICollectionViewDataSource, UICollectionView
         ])
         
 //        NSLayoutConstraint.activate([
-////            save.centerXAnchor.constraint(equalTo: view.rightAnchor, constant: -96.5),
-//            save.topAnchor.constraint(equalTo: view.topAnchor, constant: 40),
-////            save.centerYAnchor.constraint(equalTo: Av5.centerYAnchor, constant: 181),
+//            save.topAnchor.constraint(equalTo: view.topAnchor, constant: 60),
 //            save.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
 //            save.widthAnchor.constraint(equalToConstant: 30),
 //            save.heightAnchor.constraint(equalToConstant: 20)
@@ -217,28 +212,109 @@ class PhotoPopUp: UIViewController, UICollectionViewDataSource, UICollectionView
     }
     
     @objc func Av1Pressed() {
-//        profileImage.image = UIImage(named: "image1")
+        Av1.layer.borderWidth = 1
+        Av2.layer.borderWidth = 0
+        Av3.layer.borderWidth = 0
+        Av4.layer.borderWidth = 0
+        Av5.layer.borderWidth = 0
+        Av6.layer.borderWidth = 0
+        Av7.layer.borderWidth = 0
+        Av8.layer.borderWidth = 0
+        Av1.layer.borderColor = UIColor(red: 0.69, green: 0.082, blue: 0.192, alpha: 1).cgColor
+        savedImage.image = Av1.image(for: .normal)
     }
     
     @objc func Av2Pressed() {
-//        profileImage.image = UIImage(named: "image2")
+        Av1.layer.borderWidth = 0
+        Av2.layer.borderWidth = 1
+        Av3.layer.borderWidth = 0
+        Av4.layer.borderWidth = 0
+        Av5.layer.borderWidth = 0
+        Av6.layer.borderWidth = 0
+        Av7.layer.borderWidth = 0
+        Av8.layer.borderWidth = 0
+        Av2.layer.borderColor = UIColor(red: 0.69, green: 0.082, blue: 0.192, alpha: 1).cgColor
+        savedImage.image = Av2.image(for: .normal)
     }
     @objc func Av3Pressed() {
-//        profileImage.image = UIImage(named: "image3")
+        Av1.layer.borderWidth = 0
+        Av2.layer.borderWidth = 0
+        Av3.layer.borderWidth = 1
+        Av4.layer.borderWidth = 0
+        Av5.layer.borderWidth = 0
+        Av6.layer.borderWidth = 0
+        Av7.layer.borderWidth = 0
+        Av8.layer.borderWidth = 0
+        Av3.layer.borderColor = UIColor(red: 0.69, green: 0.082, blue: 0.192, alpha: 1).cgColor
+        savedImage.image = Av3.image(for: .normal)
     }
     
     @objc func Av4Pressed() {
-//        profileImage.image = UIImage(named: "image4")
+        Av1.layer.borderWidth = 0
+        Av2.layer.borderWidth = 0
+        Av3.layer.borderWidth = 0
+        Av4.layer.borderWidth = 1
+        Av5.layer.borderWidth = 0
+        Av6.layer.borderWidth = 0
+        Av7.layer.borderWidth = 0
+        Av8.layer.borderWidth = 0
+        Av4.layer.borderColor = UIColor(red: 0.69, green: 0.082, blue: 0.192, alpha: 1).cgColor
+        savedImage.image = Av4.image(for: .normal)
     }
     @objc func Av5Pressed() {
-//        profileImage.image = UIImage(named: "image5")
+        Av1.layer.borderWidth = 0
+        Av2.layer.borderWidth = 0
+        Av3.layer.borderWidth = 0
+        Av4.layer.borderWidth = 0
+        Av5.layer.borderWidth = 1
+        Av6.layer.borderWidth = 0
+        Av7.layer.borderWidth = 0
+        Av8.layer.borderWidth = 0
+        Av5.layer.borderColor = UIColor(red: 0.69, green: 0.082, blue: 0.192, alpha: 1).cgColor
+        savedImage.image = Av5.image(for: .normal)
     }
     @objc func Av6Pressed() {
-//        profileImage.image = UIImage(named: "image6")
+        Av1.layer.borderWidth = 0
+        Av2.layer.borderWidth = 0
+        Av3.layer.borderWidth = 0
+        Av4.layer.borderWidth = 0
+        Av5.layer.borderWidth = 0
+        Av6.layer.borderWidth = 1
+        Av7.layer.borderWidth = 0
+        Av8.layer.borderWidth = 0
+        Av6.layer.borderColor = UIColor(red: 0.69, green: 0.082, blue: 0.192, alpha: 1).cgColor
+        savedImage.image = Av6.image(for: .normal)
+    }
+    
+    @objc func Av7Pressed() {
+        Av1.layer.borderWidth = 0
+        Av2.layer.borderWidth = 0
+        Av3.layer.borderWidth = 0
+        Av4.layer.borderWidth = 0
+        Av5.layer.borderWidth = 0
+        Av6.layer.borderWidth = 0
+        Av7.layer.borderWidth = 1
+        Av8.layer.borderWidth = 0
+        Av7.layer.borderColor = UIColor(red: 0.69, green: 0.082, blue: 0.192, alpha: 1).cgColor
+        savedImage.image = Av7.image(for: .normal)}
+    
+    @objc func Av8Pressed() {
+        Av1.layer.borderWidth = 0
+        Av2.layer.borderWidth = 0
+        Av3.layer.borderWidth = 0
+        Av4.layer.borderWidth = 0
+        Av5.layer.borderWidth = 0
+        Av6.layer.borderWidth = 0
+        Av7.layer.borderWidth = 0
+        Av8.layer.borderWidth = 1
+        Av8.layer.borderColor = UIColor(red: 0.69, green: 0.082, blue: 0.192, alpha: 1).cgColor
+        savedImage.image = Av8.image(for: .normal)
     }
 
     @objc func savePressed() {
+//        print(1)
 //        profileImage.image = UIImage(named: "image6")
+        
         navigationController?.popViewController(animated: true)
 //        dismiss(animated: true, completion: nil)
     }

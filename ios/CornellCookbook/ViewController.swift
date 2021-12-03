@@ -8,15 +8,19 @@
 import UIKit
 
 protocol updateRecipeDelegate: class {
-    func getRecipeList(allRecipies: [Recipie])
-    func updateIngredients(newIngredients: [Ingredients])
-    func updateInstructions(newInstructions: [Instructions])
+//    func getRecipeList(allRecipies: [Recipie])
+//    func updateIngredients(newIngredients: [Ingredients])
+//    func updateInstructions(newInstructions: [Instructions])
 //    func updateInstructions(newString: String)
     func updateName(newString: String)
 }
 
 protocol updateInstructionDelegate: class {
     func updateInstructions(newInstructions: [Instructions])
+}
+
+protocol updateIngredientsDelegate: class {
+    func updateIngredients(newIngredients: [Ingredients])
 }
 
 var hasUserID = false
@@ -344,7 +348,7 @@ class resultsController: UIViewController {
 }
 
 //MARK: Home page Controller
-class SearchViewController: UIViewController,  UISearchBarDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, updateRecipeDelegate  {
+class SearchViewController: UIViewController,  UISearchBarDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, updateRecipeDelegate, updateInstructionDelegate, updateIngredientsDelegate  {
     func updateName(newString: String) {
         featureRecipes[0][0].name = newString
     }
@@ -361,14 +365,29 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
     }
     
     func updateIngredients(newIngredients: [Ingredients]) {
-        featureRecipes[0][0].ingredients = newIngredients
-    }
+        var ingredients: [Ingredients] = []
+        for recipes in featureRecipes {
+            for recipe in recipes {
+                for ingredients1 in recipe.ingredients {
+                    ingredients.append(ingredients1)
+                    }
+                }
+            }
+        ingredients = newIngredients
+        }
+    
     
     func updateInstructions(newInstructions: [Instructions]) {
-        featureRecipes[0][0].instructions = newInstructions
-    }
-    
-    
+        var instructions: [Instructions] = []
+        for recipes in featureRecipes {
+            for recipe in recipes {
+                for instructions1 in recipe.instructions {
+                    instructions.append(instructions1)
+                    }
+                }
+            }
+        instructions = newInstructions
+        }
 
     let searchControl = UISearchBar()
     let titleLabel = UILabel()
@@ -393,17 +412,11 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
     
     var featureSection = ["Featured"]
     
-//    func sortData() {
-//        postData.sort { (leftPost, rightPost) -> Bool in
-//            return leftPost.id > rightPost.id
-//        }
-//    }
-//    getAllRecipes()
+    var featureRecipe : [Recipie] = [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1, name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1, name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1, stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)]
+    
     var featureRecipes : [[Recipie]] =
-        [[Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1, name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1, name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1, stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1,name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1,name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1, name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1,name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1,name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1, name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1,name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1,name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1,name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1,name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1,name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1,name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)]]
+        [[Recipie(userId: 12, name: "Cereal", time: 4, difficulty: "Begginer", mealType: "Breakfast", cuisine: "American", ingredients: [Ingredients(id: 1, name: "Fruit Loops Cereal", amount: 3, unit: "Cups"), Ingredients(id: 1, name: "Almond Milk", amount: 5, unit: "Spoons")], instructions: [Instructions(id: 1, stepNumber: 1, step: "add milk to bowl"), Instructions(id: 1,stepNumber: 2, step: "add cereal to milk")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Spagetti", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1,name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1,name: "eggs", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Chicken Tenders", time: 4, difficulty: "Begginer", mealType: "Dinner", cuisine: "American", ingredients: [Ingredients(id: 1, name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1,name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Butter Chicken", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "American", ingredients: [Ingredients(id: 1,name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1, name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)], [Recipie(userId: 12, name: "Rice & Beans", time: 4, difficulty: "Advanved", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1,name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1,name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Simone", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1,name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1,name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2), Recipie(userId: 12, name: "Salad", time: 4, difficulty: "Begginer", mealType: "Lunch", cuisine: "Latin", ingredients: [Ingredients(id: 1,name: "eggs", amount: 3, unit: "Slices"), Ingredients(id: 1,name: "trouble", amount: 5, unit: "two")], instructions: [Instructions(id: 1,stepNumber: 1, step: "one"), Instructions(id: 1,stepNumber: 2, step: "two")], comments: [Comments(id: 12, userId: 12, text: "12")], numberOfLikes: 12, usersLiked: [User(id: 7, username: "one", email: "one", postedRecipes: [], likedRecipes: [], postedComments: ["one"])], usersCommented: [User(id: 2, username: "strg", email: "mail", postedRecipes: [], likedRecipes: [], postedComments: [])], createdAt: 2)]]
     let recipieCellReuseIdentifier = "recipieCellReuseIdentifier"
-//    var featureCollectionView : UICollectionView!
-//    let headerReuseIdentifier = "headerReuseIdentifer"
     let cellPadding: CGFloat = 10
     let sectionPadding: CGFloat = 5
     
@@ -411,7 +424,9 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        getData()
+        
+        //MARK: UNCOMMENT LATER Only when there is data in the network
+//        getData()
         
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
@@ -500,7 +515,10 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
     
     func getData() {
         NetworkManager.getAllRecipes{
-            recipes in self.featureRecipes = [recipes]
+            recipes in self.featureRecipes =
+                [recipes]
+//             [featureRecipe.append(recipes)]
+//            print(recipes)
             DispatchQueue.main.async {
                 self.featureCollectionView.reloadData()
             }
@@ -542,7 +560,6 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
             profile.heightAnchor.constraint(equalToConstant: 23),
             profile.leadingAnchor.constraint(equalTo: filter.trailingAnchor, constant: 5),
             profile.centerYAnchor.constraint(equalTo: filter.centerYAnchor)
-//            profile.topAnchor.constraint(equalTo: view.topAnchor, constant: 93)
         ])
         
         NSLayoutConstraint.activate([
@@ -644,7 +661,7 @@ class SearchViewController: UIViewController,  UISearchBarDelegate, UICollection
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         featureRecipes[indexPath.section][indexPath.item].isSelected.toggle()
         if featureRecipes[indexPath.section][indexPath.item].isSelected {
-            let vc = PresentViewController(delegate: self, placeholderName: featureRecipes[indexPath.section][indexPath.item].name, placeholderIngredients: featureRecipes[indexPath.section][indexPath.item].ingredients, placeholderInstructions: featureRecipes[indexPath.section][indexPath.item].instructions)
+            let vc = PresentViewController(delegate: self, placeholderName: featureRecipes[indexPath.section][indexPath.item].name, placeholderIngredients: featureRecipes[indexPath.section][indexPath.item].ingredients, placeholderInstructions: featureRecipes[indexPath.section][indexPath.item].instructions, placeholderCuisine: featureRecipes[indexPath.section][indexPath.item].cuisine, placeholderMeal: featureRecipes[indexPath.section][indexPath.item].mealType, placeholderTime: featureRecipes[indexPath.section][indexPath.item].time, placeholderDifficulty: featureRecipes[indexPath.section][indexPath.item].difficulty)
             vc.modalPresentationStyle = .fullScreen
             navigationController?.present(vc, animated: true)
 //            self.present(vc, animated: true, completion: nil)
@@ -802,7 +819,12 @@ class HomeViewController: UIViewController, UICollectionViewDataSource, UICollec
 
 //present view controller
 //MARK: Recipe Controller
-class PresentViewController: UIViewController {
+class PresentViewController: UIViewController, updateRecipeDelegate {
+    func updateName(newString: String) {
+        label.text = newString
+    }
+    
+    
 
     // TODO 8: set up delegate
     weak var delegate: updateRecipeDelegate?
@@ -825,17 +847,27 @@ class PresentViewController: UIViewController {
     var placeholderIngredients: [Ingredients]?
     var placeholderName: String?
     var placeholderInstructions: [Instructions]?
+    var placeholderMeal: String?
+    var placeholderCuisine: String?
+    var placeholderDifficulty: String?
+    var placeholderTime: Int?
 
     // TODO 10: initialize placeholder text
     
 //    weak var delegate: updateRecipeDelegate?
-    init(delegate: updateRecipeDelegate?, placeholderName: String, placeholderIngredients: [Ingredients], placeholderInstructions: [Instructions]) {
+    init(delegate: updateRecipeDelegate?, placeholderName: String, placeholderIngredients: [Ingredients], placeholderInstructions: [Instructions], placeholderCuisine: String, placeholderMeal: String, placeholderTime: Int, placeholderDifficulty: String) {
         self.delegate = delegate
         self.placeholderName = placeholderName
         self.placeholderIngredients = placeholderIngredients
         self.placeholderInstructions = placeholderInstructions
+        self.placeholderMeal = placeholderMeal
+        self.placeholderTime = placeholderTime
+        self.placeholderCuisine = placeholderCuisine
+        self.placeholderDifficulty = placeholderDifficulty
+//        self.placeholderDifficulty = placeholderDifficulty
         super.init(nibName: nil, bundle: nil)
     }
+
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -858,24 +890,25 @@ class PresentViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         
         
-        foodImage.image = UIImage(named: "Avatar 1")
+        foodImage.image = UIImage(named: "\(placeholderMeal ?? "Dinner") 1")
+//        print(foodImage.image)
         foodImage.translatesAutoresizingMaskIntoConstraints = false
         
-        diffcultyTag.text = "Beginner"
+        diffcultyTag.text = placeholderDifficulty
         diffcultyTag.textAlignment = .center
         diffcultyTag.font = UIFont(name: "Galvji", size: 12)
         diffcultyTag.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
         diffcultyTag.layer.cornerRadius = 13.5
         diffcultyTag.translatesAutoresizingMaskIntoConstraints = false
         
-        timeTag.text = "10 min"
+        timeTag.text = "4 min"
         timeTag.textAlignment = .center
         timeTag.font = UIFont(name: "Galvji", size: 12)
         timeTag.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
         timeTag.layer.cornerRadius = 13.5
         timeTag.translatesAutoresizingMaskIntoConstraints = false
         
-        cuisineTag.text = "Asian"
+        cuisineTag.text = placeholderCuisine
         cuisineTag.textAlignment = .center
         cuisineTag.font = UIFont(name: "Galvji", size: 12)
         cuisineTag.layer.backgroundColor = UIColor(red: 0.942, green: 0.657, blue: 0.451, alpha: 1).cgColor
@@ -900,7 +933,7 @@ class PresentViewController: UIViewController {
         view.addSubview(ingredientsButton)
         view.addSubview(methodLabel)
         view.addSubview(button)
-        let vc = IngredientController()
+        let vc = IngredientController(delegate: self, ingredientsPlace: placeholderIngredients!)
         view.addSubview(vc)
         
         setUpConstraints()
@@ -913,13 +946,12 @@ class PresentViewController: UIViewController {
             navigationController?.popViewController(animated: true)
 //            present(vc, animated: true)
 //            navigationController?.popViewController(vc, animated: true)
-            let vc = MethodController()
-//            vc.init
+            let vc = MethodController(delegate: self, placeholderInstructions: placeholderInstructions!)
             view.addSubview(vc)
         } else {
             methodLabel.setImage(UIImage(named: "methodnot"), for: .normal)
             ingredientsButton.setImage(UIImage(named: "ingredient"), for: .normal)
-            let vc = IngredientController()
+            let vc = IngredientController(delegate: self, ingredientsPlace: placeholderIngredients!)
             view.addSubview(vc)
         }
     }
@@ -928,14 +960,14 @@ class PresentViewController: UIViewController {
         if methodLabel.currentImage == UIImage(named: "method") {
             ingredientsButton.setImage(UIImage(named: "ingredient"), for: .normal)
             methodLabel.setImage(UIImage(named: "methodnot"), for: .normal)
-            let vc = IngredientController()
+            let vc = IngredientController(delegate: self, ingredientsPlace: placeholderIngredients!)
             view.addSubview(vc)
 //            present(vc, animated: true)
 //            navigationController?.pushViewController(vc, animated: true)
         } else {
             methodLabel.setImage(UIImage(named: "method"), for: .normal)
             ingredientsButton.setImage(UIImage(named: "ingredientnot"), for: .normal)
-            let vc = MethodController()
+            let vc = MethodController(delegate: self, placeholderInstructions: placeholderInstructions!)
             view.addSubview(vc)
         }
     }
@@ -1015,6 +1047,7 @@ class PresentViewController: UIViewController {
         // TODO 5: dismiss view controller
         dismiss(animated: true, completion: nil)
     }
+    
 
 }
 
@@ -1241,6 +1274,8 @@ class NewViewController: UIViewController, UITableViewDataSource, UITableViewDel
 //MARK: Ingredient Table Controller
 class IngredientController: UIView, UITableViewDelegate, UITableViewDataSource{
     
+    weak var delegate: updateRecipeDelegate?
+    
     var tableView = UITableView()
     var image = UIImageView()
 
@@ -1256,23 +1291,18 @@ class IngredientController: UIView, UITableViewDelegate, UITableViewDataSource{
 
     var ingredients: [Ingredients] = []
     
-
-
-
     override init (frame: CGRect) {
         super.init(frame: frame)
-//        self.frame = UIScreen.main.bounds
         self.frame = CGRect(x: 0, y: 550, width: 400, height: 304)
         
-        let ingredient1 = Ingredients(id: 1, name: "Beans", amount: 2, unit: "String")
-        let ingredient2 = Ingredients(id: 1, name: "Beans", amount: 2, unit: "String")
-        let ingredient3 = Ingredients(id: 1, name: "Beans", amount: 2, unit: "String")
-        let ingredient4 = Ingredients(id: 1, name: "Beans", amount: 2, unit: "String")
-        let ingredient5 = Ingredients(id: 1, name: "Beans", amount: 2, unit: "String")
-        let ingredient6 = Ingredients(id: 1, name: "Beans", amount: 2, unit: "String")
-        
-        
-        ingredients = [ingredient1, ingredient2, ingredient3, ingredient4,ingredient5, ingredient6,]
+    }
+    
+    init (delegate: updateRecipeDelegate?, ingredientsPlace: [Ingredients]) {
+//        super.init(coder: NSCoder.init())
+        self.delegate = delegate
+        self.ingredients = ingredientsPlace
+//        print(self.ingredients)
+        super.init(frame: CGRect(x: 0, y: 550, width: 400, height: 304))
 
         // Initialize tableView
 //        var ingredients: [Ingredients] = []
@@ -1285,7 +1315,6 @@ class IngredientController: UIView, UITableViewDelegate, UITableViewDataSource{
         self.addSubview(container)
         self.addSubview(tableView)
 
-        
         container.heightAnchor.constraint(equalToConstant: 304).isActive = true
         container.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
         container.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
@@ -1299,7 +1328,6 @@ class IngredientController: UIView, UITableViewDelegate, UITableViewDataSource{
             tableView.bottomAnchor.constraint(equalTo: container.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -1311,6 +1339,7 @@ class IngredientController: UIView, UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath) as? IngredientTableViewCell {
             let ingredients = ingredients[indexPath.row]
+//            print(ingredients)
             cell.configure(ingredient: ingredients)
             cell.selectionStyle = .none
             return cell
@@ -1354,34 +1383,18 @@ class MethodController: UIView, UITableViewDelegate, UITableViewDataSource, upda
 
     // TODO 10: initialize placeholder text
     
-    weak var delegate: updateInstructionDelegate?
+    weak var delegate: updateRecipeDelegate?
     
-    init(delegate: updateInstructionDelegate?, placeholderInstructions: [Instructions]) {
+    init(delegate: updateRecipeDelegate?, placeholderInstructions: [Instructions]) {
         self.delegate = delegate
         self.placeholderInstructions = placeholderInstructions
 //        super.init(nibName: nil, bundle: nil)
         super.init(frame: CGRect(x: 0, y: 550, width: 400, height: 304))
-    }
-
-
-    override init (frame: CGRect) {
-        super.init(frame: frame)
-//        self.frame = UIScreen.main.bounds
-        self.frame = CGRect(x: 0, y: 550, width: 400, height: 304)
+        
         
         methodLabel.text = "Instructions"
         methodLabel.font = UIFont(name: "Galvji", size: 20)
-        
-        let instruction1 = Instructions(id: 1, stepNumber: 1, step: "Pick cereel of your choosing")
-        let instruction2 = Instructions(id: 1, stepNumber: 1, step: "Pick cereel of your choosing")
-        let instruction3 = Instructions(id: 1, stepNumber: 1, step: "Pick cereel of your choosing")
-        let instruction4 = Instructions(id: 1, stepNumber: 1, step: "Pick cereel of your choosing")
-        let instruction5 = Instructions(id: 1, stepNumber: 1, step: "Pick cereel of your choosing")
-        
-        
-        instructions1 = [instruction1, instruction2, instruction3, instruction4, instruction5]
-        instructions = placeholderInstructions ?? instructions1
-//        print(placeholderInstructions!)
+        instructions = placeholderInstructions
 
         // Initialize tableView
         tableView.separatorColor = .white
@@ -1408,11 +1421,8 @@ class MethodController: UIView, UITableViewDelegate, UITableViewDataSource, upda
         ])
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        print(instructions.count)
         return instructions.count
     }
 
@@ -1430,4 +1440,16 @@ class MethodController: UIView, UITableViewDelegate, UITableViewDataSource, upda
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 21
     }
+
+    
+    override init (frame: CGRect) {
+        super.init(frame: frame)
+        self.frame = CGRect(x: 0, y: 550, width: 400, height: 304)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    
 }

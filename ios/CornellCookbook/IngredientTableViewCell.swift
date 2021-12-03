@@ -43,6 +43,7 @@ class IngredientTableViewCell: UITableViewCell {
 
     func configure(ingredient: Ingredients) {
         nameLabel.text =  ingredient.name
+//        print(nameLabel.text)
         unitLabel.text =  ingredient.unit
         amountLabel.text = String(ingredient.amount)
     }

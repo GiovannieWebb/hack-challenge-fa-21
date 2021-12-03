@@ -46,21 +46,22 @@ class NetworkManager{
             }
     }
     }
-    
-//    static func getIngredients (completion: @escaping ([Ingredients]) -> Void)
-//    {
-//        AF.request(host, method: .get).validate().responseData { response in
-//            switch response.result {
-//            case .success(let data):
-//                let jsonDecoder = JSONDecoder()
-//                if let post = try? jsonDecoder.decode([Ingredients].self, from: data) {
-//                    completion(post)
-//                }
-//            case .failure(let error):
-//                print(error)
-//            }
-//    }
-//    }
+    //check API
+    static func getIngredients (completion: @escaping ([Ingredients]) -> Void)
+    {
+        AF.request("https://cookbookendpoints.herokuapp.com/api/ingredients/", method: .get).validate().responseData { response in
+            switch response.result {
+            case .success(let ingredients):
+                let jsonDecoder = JSONDecoder()
+                if let ingredientResponse = try? jsonDecoder.decode(IngredientResponse.self, from: ingredients) {
+                    let ingredients = ingredientResponse.ingredients
+                    completion(ingredients)
+                }
+            case .failure(let error):
+                print(error)
+            }
+    }
+    }
     
     static func getLikedRecipesFromUser (userId: Int, completion: @escaping ([Recipie]) -> Void)
     {

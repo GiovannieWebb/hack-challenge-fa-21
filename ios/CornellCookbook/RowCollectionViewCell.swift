@@ -71,7 +71,14 @@ class RowCollectionViewCell: UICollectionViewCell {
     }
 
     func configure(for recipie: Recipie) {
-       recipieImageView.image = recipie.getImage()
+//       recipieImageView.image = recipie.getImage()
+        recipieImageView.image = UIImage(named: "\(recipie.mealType) 1")
+//        print(
+        difficulty.text = recipie.difficulty
+        cuisine.text = recipie.cuisine
+        time.text = "\(String(recipie.time)) min"
+        recipeName.text = recipie.name
+//        "\(host)/recipes/1/"
     }
     
 

@@ -7,100 +7,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "2D664DBC-8BCE-4B45-AB31-341F6568C8CA"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "CornellCookbook/RecipeCollectionViewCell.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "10"
-            endingLineNumber = "10"
-            landmarkName = "unknown"
-            landmarkType = "0">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "AEADEB51-2FB8-415F-897D-F784028B5495"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "CornellCookbook/RecipeCollectionViewCell.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "11"
-            endingLineNumber = "11"
-            landmarkName = "unknown"
-            landmarkType = "0">
-            <Locations>
-               <Location
-                  uuid = "AEADEB51-2FB8-415F-897D-F784028B5495 - ef0a8dbf4b6cae9c"
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "CornellCookbook.RecipeCollectionViewCell.recipieImageView.getter : __C.UIImageView"
-                  moduleName = "CornellCookbook"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/kaylasprayberry7/github/hack-challenge-fa-2021/ios/CornellCookbook/RecipeCollectionViewCell.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "11"
-                  endingLineNumber = "11"
-                  offsetFromSymbolStart = "126">
-               </Location>
-               <Location
-                  uuid = "AEADEB51-2FB8-415F-897D-F784028B5495 - 35e87adfeb638290"
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "CornellCookbook.RecipeCollectionViewCell.recipieImageView.setter : __C.UIImageView"
-                  moduleName = "CornellCookbook"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/kaylasprayberry7/github/hack-challenge-fa-2021/ios/CornellCookbook/RecipeCollectionViewCell.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "11"
-                  endingLineNumber = "11"
-                  offsetFromSymbolStart = "164">
-               </Location>
-               <Location
-                  uuid = "AEADEB51-2FB8-415F-897D-F784028B5495 - dd69e99f19d57436"
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "CornellCookbook.RecipeCollectionViewCell.recipieImageView.modify : __C.UIImageView"
-                  moduleName = "CornellCookbook"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/kaylasprayberry7/github/hack-challenge-fa-2021/ios/CornellCookbook/RecipeCollectionViewCell.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "0"
-                  endingLineNumber = "0"
-                  offsetFromSymbolStart = "18">
-               </Location>
-               <Location
-                  uuid = "AEADEB51-2FB8-415F-897D-F784028B5495 - 2ebb54108be2c019"
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "CornellCookbook.RecipeCollectionViewCell.recipieImageView.modify : __C.UIImageView with unmangled suffix &quot;.resume.0&quot;"
-                  moduleName = "CornellCookbook"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/kaylasprayberry7/github/hack-challenge-fa-2021/ios/CornellCookbook/RecipeCollectionViewCell.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "11"
-                  endingLineNumber = "11"
-                  offsetFromSymbolStart = "8">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "255392F3-CB0B-4BFF-A524-23F21BF9E559"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -124,8 +30,8 @@
             filePath = "CornellCookbook/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "785"
-            endingLineNumber = "785"
+            startingLineNumber = "802"
+            endingLineNumber = "802"
             landmarkName = "HomeViewController"
             landmarkType = "3">
          </BreakpointContent>
@@ -140,8 +46,8 @@
             filePath = "CornellCookbook/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1242"
-            endingLineNumber = "1242"
+            startingLineNumber = "1275"
+            endingLineNumber = "1275"
             landmarkName = "IngredientController"
             landmarkType = "3">
          </BreakpointContent>

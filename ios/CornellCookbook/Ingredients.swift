@@ -7,7 +7,11 @@
 
 import UIKit
 
-class Ingredients: Codable {
+struct IngredientResponse: Codable {
+    var ingredients: [Ingredients]
+}
+
+struct Ingredients: Codable {
 
     var id: Int
     var name: String
@@ -15,7 +19,7 @@ class Ingredients: Codable {
     var unit: String
     
     init(id: Int, name: String, amount: Int, unit: String) {
-        self.id = id 
+        self.id = id
         self.name = name
         self.amount = amount
         self.unit = unit
