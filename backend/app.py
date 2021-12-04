@@ -74,7 +74,7 @@ def get_all_users():
                 ...
             ]
         }
-    Sucess Response: 200
+    Success Response: 200
     Error Responses: None
     """
     return success_response(
@@ -111,7 +111,7 @@ def get_all_recipes():
                 ...
             ]
         }
-    Sucess Response: 200
+    Success Response: 200
     Error Responses: None
     """
     return success_response(
@@ -490,7 +490,7 @@ def register_account():
         "update_token": <string>,
         "update_expiration": <string>, <- string of datetime object
     }
-    Sucess Response: 201
+    Success Response: 201
     Error Responses: 400 if username, email, or password not specified.
                      403 if user already exists.
     """
@@ -535,7 +535,7 @@ def login():
         "update_token": <string>,
         "update_expiration": <string>, <- string of datetime object
     }
-    Sucess Response: 200
+    Success Response: 200
     Error Responses: 400 email or password not specified.
                      404 if email or password incorrect.
     """
@@ -574,7 +574,7 @@ def update_session():
         "update_token": <string>,
         "update_expiration": <string>, <- string of datetime object
     }
-    Sucess Response: 200
+    Success Response: 200
     Error Responses: 400 if invalid update token.
     """
     success, update_token = extract_token(request)
@@ -610,11 +610,11 @@ def get_user_from_validated_session():
         "liked_recipes": <recipe-list-without-users-liked>,
         "posted_comments": <comment-list-without-user-ids>
     }
-    Sucess Response: 200
+    Success Response: 200
     Error Responses: 400 if invalid session token.
     """
-    sucess, session_token = extract_token(request)
-    if not sucess:
+    success, session_token = extract_token(request)
+    if not success:
         return failure_response(session_token)
 
     valid_user = Authentication.verify_session(session_token)
@@ -1070,7 +1070,7 @@ def update_user(user_id):
         "liked_recipes": <recipe-list-without-users-liked>,
         "posted_comments": <comment-list-without-user-ids>
     }
-    Sucess Response: 200
+    Success Response: 200
     Error Responses: 404 if user does not exist.
                      400 if old username or old password not specified.
                      Ambiguous error code if old email or old password incorrect.
@@ -1132,7 +1132,7 @@ def upload_image():
         "user_id": <integer>,
         "recipe_id": <integer>
     }
-    Sucess Response: 201
+    Success Response: 201
     Error Responses: 404 if user does not exist or recipe does not exist.
                      400 if user_id and recipe_id not specified.
     """

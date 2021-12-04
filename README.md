@@ -20,8 +20,9 @@ The purpose of the CornellCookbook app is to connect the Cornell community throu
         2. Recipe -- many-to-many with users who liked and one-to-many with user who posted, ingredients, and instructions (User, Ingredient, and Instruction table relations)
         3. Ingredient -- one-to-many with recipes (Recipe table relation)
         4. Instruction -- one-to-many with recipes (Recipe table relation)
-   * API Specification: found in repo
 
+   * API Specification: https://drive.google.com/file/d/1q3FCY79J1o2nTnD8N867aiosd68dDT9b/view?usp=sharing
+    
   **IOS:**
   * AutoLayout using NSLayoutConstraint or SnapKit: AutoLayout using NSLayoutConstraint
 
