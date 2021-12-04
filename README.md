@@ -12,7 +12,7 @@ The purpose of the CornellCookbook app is to connect the Cornell community throu
 
 ## A list of how the app addresses each of the requirements:
   **Backend:**
-   * Base URL (containerized with Docker, deployed via Heroku app. Note that the Heroku app may take a little bit to load on the first load/if the app hasn't been visited for a while, so give it a few seconds.)
+   * Base URL (containerized with Docker, deployed via Heroku app. Note that the Heroku app may take a little bit to load on the first load/if the app hasn't been visited for a while, so give it a few seconds if need be)
     - https://cookbookendpoints.herokuapp.com/
 
    * 4+ routes (1 GET, 1 POST): 14 GET routes, 10 POST routes, 4 DELETE routes
