@@ -1,4 +1,4 @@
-# hack-challenge-fa-2021
+# Hack Challenge Fall 2021
 
 ## App Name:
 Cornell Cookbook
