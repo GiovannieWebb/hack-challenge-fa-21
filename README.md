@@ -31,7 +31,7 @@ The purpose of the CornellCookbook app is to connect the Cornell community throu
         1. UICollectionView: 3 on home page
         2. UITableView: 2 on recipe page, one for ingredients, and one for instructions
   * Integration with an API - this API must provide some meaningful value to your app.: 
-      * API is used to get reicpes to display 
+      * API is used to get recipes to display 
 
   **Design:**
   * Figma files: 
