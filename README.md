@@ -34,6 +34,20 @@ The purpose of the CornellCookbook app is to connect the Cornell community throu
       * API is used to get reicpes to display 
 
   **Design:**
+  * Figma files: 
+    - https://www.figma.com/file/KIzluyhsHMUcSKnVBeIFgT/Hackathon-Challenge?node-id=0%3A1
+    - https://www.figma.com/file/KIzluyhsHMUcSKnVBeIFgT/Hackathon-Challenge?node-id=9%3A2628
+
+  * Fidelity Sketches and Explorations:
+    - ![Active Recipe Exploration](/design/active-recipe-exploration-1.png)
+    - ![Active Recipe Likes/Comments Edit](/design/active-recipe-likes-comments-edit-1.png)
+    - ![Homepage](/design/homepage-1.png)
+    - ![Homepage Exploration](/design/homepage-explorations-1.png)
+    - ![New Recipe Exploration](/design/new-recipe-exploration-1.png)
+    - ![Onboarding/Login/Signup](/design/onboarding-login-signup-1.png)
+    - ![Profile and New Recipe Creation](/design/profile-and-new-recipe-creation-1.png)
+    - ![Search Exploration](/design/search-exploration-1.png)
+    - ![Visual Exploration](/design/visual-explorations-1.png)
 
 ## Some screenshots of app (highlight important features):
 ![Login/Sigup Page](/images/login-signup.png)
