@@ -8,6 +8,7 @@ _Sharing Big Red recipes with the Cornell community!_
 
 ## Some screenshots of app (highlight important features):
 
+
 ## A short description of the app (its purpose and features):
 The purpose of the CornellCookbook app is to connect the Cornell community through the sharing of food recipes. Users are prompted to register accounts and are able to interact with the platform once logged in. Users are able to add new recipes, view existing recipes, and interact with other users via likes and comments on shared recipes. On a user's profile, posted and liked recipes are stored for easy access later. Recipes are organized by categories such as cuisine, difficulty, preparation time, and popularity, which makes user navigation more efficient and enjoyable!
 
@@ -32,3 +33,8 @@ The purpose of the CornellCookbook app is to connect the Cornell community throu
   * Integration with an API - this API must provide some meaningful value to your app.: API is used to get reicpes to display 
 
   **Design:**
+
+  ## Demo Video:
+
+  [![Cornell Cookbook Demo Video](http://img.youtube.com/vi/3tA_bOlpaOA/0.jpg)](http://www.youtube.com/watch?v=3tA_bOlpaOA)
+
