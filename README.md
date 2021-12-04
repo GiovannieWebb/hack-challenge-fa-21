@@ -25,7 +25,7 @@ The purpose of the CornellCookbook app is to connect the Cornell community throu
 
    * API Specification: https://drive.google.com/file/d/1q3FCY79J1o2nTnD8N867aiosd68dDT9b/view?usp=sharing
     
-  **IOS:**
+  **iOS:**
   * AutoLayout using NSLayoutConstraint or SnapKit: 
       * AutoLayout using NSLayoutConstraint
 
