@@ -25,12 +25,15 @@ The purpose of the CornellCookbook app is to connect the Cornell community throu
    * API Specification: https://drive.google.com/file/d/1q3FCY79J1o2nTnD8N867aiosd68dDT9b/view?usp=sharing
     
   **IOS:**
-  * AutoLayout using NSLayoutConstraint or SnapKit: AutoLayout using NSLayoutConstraint
+  * AutoLayout using NSLayoutConstraint or SnapKit: 
+      * AutoLayout using NSLayoutConstraint
 
-  * At least one UICollectionView or UITableView: 1+ UICollectionViews and Tables
+  * At least one UICollectionView or UITableView: 
+      * 1+ UICollectionViews and Tables
         1. UICollectionView: 3 on home page
         2. UITableView: 2 on recipe page, one for ingredients, and one for instructions
-  * Integration with an API - this API must provide some meaningful value to your app.: API is used to get reicpes to display 
+  * Integration with an API - this API must provide some meaningful value to your app.: 
+      * API is used to get reicpes to display 
 
   **Design:**
 
